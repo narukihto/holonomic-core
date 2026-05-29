@@ -1,5 +1,4 @@
 use dashmap::DashMap;
-use rayon::prelude::*;
 use std::sync::Arc;
 
 /// Operational configuration embedding the exact topological distance boundaries and physics multipliers.
@@ -15,7 +14,7 @@ pub struct HolonomicSystemState {
     pub state_observer: Arc<DashMap<String, f64>>,
 }
 
-/// Core Analog Topological Quantum Holonomic TSP Solver operating on an SO(n) Vector Bundle manifold.
+/// Core Hybrid Topological-Heuristic TSP Solver operating via Geometric Gauge Field Guidance.
 pub struct HolonomicQuantumSolver<const N: usize> {
     pub config: QuantumBundleConfig<N>,
     pub state: HolonomicSystemState,
@@ -130,7 +129,7 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
         omega
     }
 
-    /// High-order Taylor Expansion mapping the exact matrix exponential of non-Abelian Lie algebras concurrently.
+    /// High-order Taylor Expansion mapping the exact matrix exponential of non-Abelian Lie algebras.
     pub fn compute_matrix_exponential(&self, algebra_mat: &[[f64; N]; N]) -> [[f64; N]; N] {
         let mut exp_mat = [[0.0; N]; N];
         let mut term = [[0.0; N]; N];
@@ -161,89 +160,85 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
         exp_mat
     }
 
-    /// Executes the non-destructive topological charge collapse to resolve the exact optimal tour layout.
+    /// NEW: Topological Ant Colony Optimization (TACO)
+    /// Employs heuristic agent paths guided dynamically by Berry Phase Gradients and Adiabatic field weights.
     #[allow(clippy::needless_range_loop)]
     pub fn execute_topological_collapse(&self) -> f64 {
-        let root_node = 0;
-        let branches: Vec<usize> = (1..N).collect();
+        let total_ants = 20; // Number of heuristic exploration agents
+        let mut global_best_cost = f64::INFINITY;
+        
+        // Base state projection matrix
+        let mut state_matrix = [[0.0; N]; N];
+        for i in 0..N {
+            state_matrix[i][i] = 1.0;
+        }
 
-        let parallel_collapsed_states: Vec<f64> = branches
-            .par_iter()
-            .map(|&initial_jump| {
-                let mut state_matrix = [[0.0; N]; N];
-                for i in 0..N {
-                    state_matrix[i][i] = 1.0;
-                }
+        // Calculate global topological steering fields once to maximize O(1) step execution
+        let grad = self.compute_manifold_gradient(&state_matrix);
+        let omega = self.apply_skew_symmetric_rotator(&state_matrix, &grad);
+        let propagator = self.compute_matrix_exponential(&omega);
 
-                let mut system_path = vec![root_node, initial_jump];
-                let mut tracking_nodes: Vec<usize> = (1..N).collect();
-                tracking_nodes.retain(|&node| node != initial_jump);
+        for ant in 0..total_ants {
+            let root_node = ant % N; // Disperse starting anchor points across the grid
+            let mut system_path = vec![root_node];
+            let mut unvisited = vec![true; N];
+            unvisited[root_node] = false;
 
-                let mut current_energy = self.config.distance_matrix[root_node][initial_jump];
-                let mut evolution_step = 0.0;
-                let step_delta = 1.0 / (N as f64);
+            let mut current_energy = 0.0;
+            let mut evolution_step = 0.0;
+            let step_delta = 1.0 / (N as f64);
 
-                while !tracking_nodes.is_empty() {
-                    let next_selection = tracking_nodes[0];
-                    tracking_nodes.remove(0);
+            for _ in 1..N {
+                let current_node = system_path[system_path.len() - 1];
+                let gauge_factor = self.compute_berry_phase_gauge(&system_path);
+                let adiabatic_blend = self.simulate_adiabatic_evolution(
+                    evolution_step,
+                    current_energy,
+                    gauge_factor,
+                );
 
-                    // 1. Calculate geometric gauge field metrics
-                    let gauge_factor = self.compute_berry_phase_gauge(&system_path);
+                // Compute heuristic field weights combined with topological rotator potentials
+                let mut best_next_node = usize::MAX;
+                let mut maximum_field_potential = f64::MIN;
 
-                    // 2. Pass the gauge_factor directly to lock-step adiabatic progression
-                    let adiabatic_blend = self.simulate_adiabatic_evolution(
-                        evolution_step,
-                        current_energy,
-                        gauge_factor,
-                    );
-
-                    let grad = self.compute_manifold_gradient(&state_matrix);
-                    let omega = self.apply_skew_symmetric_rotator(&state_matrix, &grad);
-                    let propagator = self.compute_matrix_exponential(&omega);
-
-                    let mut next_state = [[0.0; N]; N];
-                    for i in 0..N {
-                        for j in 0..N {
-                            let mut sum = 0.0;
-                            for k in 0..N {
-                                sum += state_matrix[i][k] * propagator[k][j];
-                            }
-                            next_state[i][j] = sum;
+                for candidate in 0..N {
+                    if unvisited[candidate] {
+                        let distance = self.config.distance_matrix[current_node][candidate];
+                        // Invert distance to prefer short paths (Heuristic) combined with spatial rotator force (Topological)
+                        let heuristic_force = 1.0 / (distance + 1e-6);
+                        let topological_force = propagator[current_node][candidate].abs();
+                        
+                        let total_force = (heuristic_force * 0.4) + (topological_force * 0.6 * adiabatic_blend);
+                        
+                        if total_force > maximum_field_potential {
+                            maximum_field_potential = total_force;
+                            best_next_node = candidate;
                         }
                     }
-                    state_matrix = next_state;
-
-                    // Continuous accumulation tracking field state weights
-                    current_energy = current_energy
-                        + self.config.distance_matrix[system_path[system_path.len() - 1]]
-                            [next_selection]
-                        + (gauge_factor * adiabatic_blend * 0.01);
-
-                    system_path.push(next_selection);
-                    evolution_step += step_delta;
                 }
 
-                let final_node = system_path[system_path.len() - 1];
-                let total_collapsed_energy =
-                    current_energy + self.config.distance_matrix[final_node][root_node];
+                if best_next_node == usize::MAX {
+                    break;
+                }
 
-                let state_key = format!("Path_{:?}", system_path);
-                self.state
-                    .state_observer
-                    .insert(state_key, total_collapsed_energy);
+                unvisited[best_next_node] = false;
+                current_energy += self.config.distance_matrix[current_node][best_next_node];
+                system_path.push(best_next_node);
+                evolution_step += step_delta;
+            }
 
-                total_collapsed_energy
-            })
-            .collect();
+            // Close the topological loop back to origin
+            let final_node = system_path[system_path.len() - 1];
+            let total_tour_cost = current_energy + self.config.distance_matrix[final_node][root_node];
 
-        let absolute_ground_state = *parallel_collapsed_states
-            .iter()
-            .min_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
-            .unwrap_or(&f64::INFINITY);
+            if total_tour_cost < global_best_cost {
+                global_best_cost = total_tour_cost;
+                let state_key = format!("AntPath_Best_{}", ant);
+                self.state.state_observer.insert(state_key, global_best_cost);
+            }
+        }
 
-        self.state
-            .state_observer
-            .insert("System_Ground_State".to_string(), absolute_ground_state);
-        absolute_ground_state
+        self.state.state_observer.insert("System_Ground_State".to_string(), global_best_cost);
+        global_best_cost
     }
 }
