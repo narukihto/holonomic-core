@@ -27,7 +27,7 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
         let state_observer = Arc::new(DashMap::new());
         state_observer.insert("System_Entropy".to_string(), 0.0);
         state_observer.insert("Protected_Spectral_Gap_Status".to_string(), 1.0);
-        
+
         Self {
             config,
             state: HolonomicSystemState { state_observer },
@@ -44,22 +44,29 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
         for i in 0..path.len() - 1 {
             let u = path[i];
             let v = path[i + 1];
-            let gauge_connection = self.config.distance_matrix[u][v] * self.config.coupling_constant;
-            accumulated_phase += gauge_connection.sin(); 
+            let gauge_connection =
+                self.config.distance_matrix[u][v] * self.config.coupling_constant;
+            accumulated_phase += gauge_connection.sin();
         }
 
         let final_node = path[path.len() - 1];
-        let return_gauge = self.config.distance_matrix[final_node][path[0]] * self.config.coupling_constant;
+        let return_gauge =
+            self.config.distance_matrix[final_node][path[0]] * self.config.coupling_constant;
         accumulated_phase += return_gauge.sin();
 
         accumulated_phase
     }
 
     /// Models the Adiabatic Transformation protecting the minimum spectral gap invariant: ΔE(t) >= 1 / (n^c)
-    pub fn simulate_adiabatic_evolution(&self, s: f64, base_energy: f64, accumulated_holonomy: f64) -> f64 {
+    pub fn simulate_adiabatic_evolution(
+        &self,
+        s: f64,
+        base_energy: f64,
+        accumulated_holonomy: f64,
+    ) -> f64 {
         let n_dimensional_factor = N as f64;
         let protected_spectral_gap = 1.0 / n_dimensional_factor.powf(2.0);
-        
+
         let h_0 = (1.0 - s) * base_energy;
         let target_energy_field = base_energy + (accumulated_holonomy * 0.01);
         let h_tsp = s * (target_energy_field * protected_spectral_gap);
@@ -77,7 +84,7 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
                 let cost_factor = self.config.distance_matrix[i][j];
                 let mut row_sum = 0.0;
                 let mut col_sum = 0.0;
-                
+
                 for k in 0..N {
                     row_sum += state_matrix[i][k];
                     col_sum += state_matrix[k][j];
@@ -92,7 +99,11 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
     }
 
     /// Computes the exact Skew-Symmetric Rotator fields to construct the anti-trap vector field topology.
-    pub fn apply_skew_symmetric_rotator(&self, x: &[[f64; N]; N], grad: &[[f64; N]; N]) -> [[f64; N]; N] {
+    pub fn apply_skew_symmetric_rotator(
+        &self,
+        x: &[[f64; N]; N],
+        grad: &[[f64; N]; N],
+    ) -> [[f64; N]; N] {
         let mut omega = [[0.0; N]; N];
         let mut xt_grad = [[0.0; N]; N];
         let mut gradt_x = [[0.0; N]; N];
@@ -122,7 +133,7 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
     pub fn compute_matrix_exponential(&self, algebra_mat: &[[f64; N]; N]) -> [[f64; N]; N] {
         let mut exp_mat = [[0.0; N]; N];
         let mut term = [[0.0; N]; N];
-        
+
         for i in 0..N {
             exp_mat[i][i] = 1.0;
             term[i][i] = 1.0;
@@ -176,9 +187,13 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
 
                     // 1. Calculate geometric gauge field metrics
                     let gauge_factor = self.compute_berry_phase_gauge(&system_path);
-                    
+
                     // 2. Pass the gauge_factor directly to lock-step adiabatic progression
-                    let adiabatic_blend = self.simulate_adiabatic_evolution(evolution_step, current_energy, gauge_factor);
+                    let adiabatic_blend = self.simulate_adiabatic_evolution(
+                        evolution_step,
+                        current_energy,
+                        gauge_factor,
+                    );
 
                     let grad = self.compute_manifold_gradient(&state_matrix);
                     let omega = self.apply_skew_symmetric_rotator(&state_matrix, &grad);
@@ -197,19 +212,23 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
                     state_matrix = next_state;
 
                     // Continuous accumulation tracking field state weights
-                    current_energy = current_energy 
-                        + self.config.distance_matrix[system_path[system_path.len() - 1]][next_selection] 
+                    current_energy = current_energy
+                        + self.config.distance_matrix[system_path[system_path.len() - 1]]
+                            [next_selection]
                         + (gauge_factor * adiabatic_blend * 0.01);
-                        
+
                     system_path.push(next_selection);
                     evolution_step += step_delta;
                 }
 
                 let final_node = system_path[system_path.len() - 1];
-                let total_collapsed_energy = current_energy + self.config.distance_matrix[final_node][root_node];
+                let total_collapsed_energy =
+                    current_energy + self.config.distance_matrix[final_node][root_node];
 
                 let state_key = format!("Path_{:?}", system_path);
-                self.state.state_observer.insert(state_key, total_collapsed_energy);
+                self.state
+                    .state_observer
+                    .insert(state_key, total_collapsed_energy);
 
                 total_collapsed_energy
             })
@@ -220,7 +239,9 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
             .min_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
             .unwrap_or(&f64::INFINITY);
 
-        self.state.state_observer.insert("System_Ground_State".to_string(), absolute_ground_state);
+        self.state
+            .state_observer
+            .insert("System_Ground_State".to_string(), absolute_ground_state);
         absolute_ground_state
     }
 }
