@@ -60,5 +60,8 @@ fn test_concurrent_observer_data_race_safety_under_load() {
     };
     let solver = HolonomicQuantumSolver::new(config);
     let _ = solver.execute_topological_collapse();
-    assert!(solver.state.state_observer.contains_key("System_Ground_State"));
+    assert!(solver
+        .state
+        .state_observer
+        .contains_key("System_Ground_State"));
 }
