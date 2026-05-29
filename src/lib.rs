@@ -166,7 +166,7 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
     pub fn execute_topological_collapse(&self) -> f64 {
         let total_ants = 20; // Number of heuristic exploration agents
         let mut global_best_cost = f64::INFINITY;
-        
+
         // Base state projection matrix
         let mut state_matrix = [[0.0; N]; N];
         for i in 0..N {
@@ -207,9 +207,10 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
                         // Invert distance to prefer short paths (Heuristic) combined with spatial rotator force (Topological)
                         let heuristic_force = 1.0 / (distance + 1e-6);
                         let topological_force = propagator[current_node][candidate].abs();
-                        
-                        let total_force = (heuristic_force * 0.4) + (topological_force * 0.6 * adiabatic_blend);
-                        
+
+                        let total_force = (heuristic_force * 0.4)
+                            + (topological_force * 0.6 * adiabatic_blend);
+
                         if total_force > maximum_field_potential {
                             maximum_field_potential = total_force;
                             best_next_node = candidate;
@@ -229,16 +230,21 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
 
             // Close the topological loop back to origin
             let final_node = system_path[system_path.len() - 1];
-            let total_tour_cost = current_energy + self.config.distance_matrix[final_node][root_node];
+            let total_tour_cost =
+                current_energy + self.config.distance_matrix[final_node][root_node];
 
             if total_tour_cost < global_best_cost {
                 global_best_cost = total_tour_cost;
                 let state_key = format!("AntPath_Best_{}", ant);
-                self.state.state_observer.insert(state_key, global_best_cost);
+                self.state
+                    .state_observer
+                    .insert(state_key, global_best_cost);
             }
         }
 
-        self.state.state_observer.insert("System_Ground_State".to_string(), global_best_cost);
+        self.state
+            .state_observer
+            .insert("System_Ground_State".to_string(), global_best_cost);
         global_best_cost
     }
 }
