@@ -191,11 +191,8 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
             for _ in 1..N {
                 let current_node = system_path[system_path.len() - 1];
                 let gauge_factor = self.compute_berry_phase_gauge(&system_path);
-                let adiabatic_blend = self.simulate_adiabatic_evolution(
-                    evolution_step,
-                    current_energy,
-                    gauge_factor,
-                );
+                let adiabatic_blend =
+                    self.simulate_adiabatic_evolution(evolution_step, current_energy, gauge_factor);
 
                 // Compute heuristic field weights combined with topological rotator potentials
                 let mut best_next_node = usize::MAX;
@@ -208,8 +205,8 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
                         let heuristic_force = 1.0 / (distance + 1e-6);
                         let topological_force = propagator[current_node][candidate].abs();
 
-                        let total_force = (heuristic_force * 0.4)
-                            + (topological_force * 0.6 * adiabatic_blend);
+                        let total_force =
+                            (heuristic_force * 0.4) + (topological_force * 0.6 * adiabatic_blend);
 
                         if total_force > maximum_field_potential {
                             maximum_field_potential = total_force;
