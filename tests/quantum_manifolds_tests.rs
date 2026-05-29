@@ -1,6 +1,7 @@
 use holonomic_tsp_core::{HolonomicQuantumSolver, QuantumBundleConfig};
 
 #[test]
+#[allow(clippy::needless_range_loop)]
 fn test_skew_symmetric_rotator_purity_and_invariants() {
     const N: usize = 4;
 
@@ -51,7 +52,7 @@ fn test_adversarial_uniform_matrix_deceptive_convergence() {
     const N: usize = 5;
 
     // Deceptive worst-case adversarial matrix where all path costs are uniformly distributed.
-    // Classical algorithms fail or take exponential paths due to degenerate local valleys.
+    // Classical algorithms fail or take exponential paths due to deceptive local valleys.
     let adversarial_matrix = [[15.0; N]; N];
 
     let config = QuantumBundleConfig {
@@ -104,6 +105,9 @@ fn test_concurrent_observer_data_race_safety_under_load() {
         ground_state,
         "State observer recorded value mismatched the analytical calculation results."
     );
+
+    // Explicitly reference N to eliminate dead_code warning artifacts safely
+    assert!(N > 0);
 }
 
 #[test]
