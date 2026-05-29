@@ -1,5 +1,6 @@
 use holonomic_tsp_core::{HolonomicQuantumSolver, QuantumBundleConfig};
 
+#[allow(clippy::needless_range_loop)]
 fn main() {
     println!("=========================================================================");
     println!("===   HYBRID TOPOLOGICAL ACO QUANTUM SOLVER CORE INITIALIZING ENGINE  ===");
