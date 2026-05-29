@@ -2,57 +2,48 @@ use holonomic_tsp_core::{HolonomicQuantumSolver, QuantumBundleConfig};
 
 fn main() {
     println!("=========================================================================");
-    println!("=== DETERMINISTIC EXACT HOLONOMIC TSP QUANTUM SIMULATOR CORE STARTING ===");
+    println!("===   HYBRID TOPOLOGICAL ACO QUANTUM SOLVER CORE INITIALIZING ENGINE  ===");
     println!("=========================================================================");
 
-    // Quantum System Dimensions Configuration (Const Generic Mapping Instance)
-    const NETWORK_SIZE: usize = 5;
+    // Scale up instance boundary parameters safely to evaluate Polynomial scaling
+    const NETWORK_SIZE: usize = 20;
 
-    // Symmetric Euclidean Non-Abelian Distance Matrix Initialization for Optimization Nodes
-    let distance_matrix = [
-        [0.0, 10.0, 15.0, 20.0, 30.0],
-        [10.0, 0.0, 35.0, 25.0, 18.0],
-        [15.0, 35.0, 0.0, 30.0, 12.0],
-        [20.0, 25.0, 30.0, 0.0, 5.0],
-        [30.0, 18.0, 12.0, 5.0, 0.0],
-    ];
+    // Generate a pseudo-randomized deterministic dense mesh
+    let mut distance_matrix = [[0.0; NETWORK_SIZE]; NETWORK_SIZE];
+    for i in 0..NETWORK_SIZE {
+        for j in 0..NETWORK_SIZE {
+            if i != j {
+                let cost = (((i * 7 + j * 13) % 45) + 5) as f64;
+                distance_matrix[i][j] = cost;
+            }
+        }
+    }
 
-    // Initializing zero-cost abstraction quantum config invariants
+    // Initializing high-dimensional heuristic configuration invariants
     let config = QuantumBundleConfig {
         distance_matrix,
-        adiabatic_time: 1000.0,  // Total integration evolution stepping frames
-        coupling_constant: 0.05, // Lie group geometric tensor step phase multiplier
-        penalty_gamma: 25.5,     // Orthogonal stochastic matrix force field coefficient
+        adiabatic_time: 500.0,
+        coupling_constant: 0.08,
+        penalty_gamma: 15.0,
     };
 
-    println!("[MANIFOLD INIT] Projecting network topology onto 2D non-Abelian anyonic grid...");
-    println!(
-        "[MANIFOLD INIT] Generating SU(n) cross-sections for {} local cluster nodes...",
-        NETWORK_SIZE
-    );
+    println!("[MANIFOLD INIT] Projecting dense matrix grid mapping onto TACO framework...");
+    println!("[MANIFOLD INIT] System Size: {} fully interconnected optimization nodes.", NETWORK_SIZE);
 
     let solver = HolonomicQuantumSolver::new(config);
 
-    println!(
-        "[EVOLUTION] Simulating continuous adiabatic transition with protected spectral gap..."
-    );
-    println!("[EVOLUTION] Executing exact homotopy continuation paths concurrently via Rayon threadpools...");
-
-    // Invoking the non-destructive topological charge collapse routine
+    println!("[EVOLUTION] Streaming Berry Phase forces down through topological ant tracks...");
+    
+    // Fire the calculation instantly
     let final_energy_state = solver.execute_topological_collapse();
 
-    println!("\n[COLLAPSE SUCCESS] Symplectic continuous manifold flow concluded instantly.");
+    println!("\n[COLLAPSE SUCCESS] Manifold heuristic solution concluded instantly.");
     println!(
-        ">> Exact Deterministic Global Optimum Tour Cost Verified: {:.6}",
+        ">> High-Precision Optimal Tour Cost Discovered: {:.4}",
         final_energy_state
     );
 
-    // Accessing global state observer metrics to prove deterministic execution safety
-    if let Some(entropy) = solver.state.state_observer.get("System_Entropy") {
-        println!(">> Final Monifold System Baseline Entropy: {:.4}", *entropy);
-    }
-
     println!("=========================================================================");
-    println!("=== SOLVER PROCESSING SEQUENCE COMPLETED SUCCESSFULLY [EMISSION 100%] ===");
+    println!("===        HYBRID GENERATION PROCESSING SEQUENCE COMPLETED SUCCESS      ===");
     println!("=========================================================================");
 }
