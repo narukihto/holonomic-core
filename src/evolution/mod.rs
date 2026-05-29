@@ -1,38 +1,4 @@
-use crate::observer::HolonomicSystemState;
-use crate::physics::QuantumBundleConfig;
-
-/// Core Hybrid Topological-Heuristic TSP Solver operating via Cosmic Gauge Guidance.
-pub struct HolonomicQuantumSolver<const N: usize> {
-    pub config: QuantumBundleConfig<N>,
-    pub state: HolonomicSystemState,
-}
-
-impl<const N: usize> HolonomicQuantumSolver<N> {
-    pub fn new(config: QuantumBundleConfig<N>) -> Self {
-        Self {
-            config,
-            state: HolonomicSystemState::default(),
-        }
-    }
-
-    /// Models the Adiabatic Transformation protecting the minimum spectral gap invariant.
-    pub fn simulate_adiabatic_evolution(
-        &self,
-        s: f64,
-        base_energy: f64,
-        accumulated_holonomy: f64,
-    ) -> f64 {
-        let n_dimensional_factor = N as f64;
-        let protected_spectral_gap = 1.0 / n_dimensional_factor.powf(2.0);
-
-        let h_0 = (1.0 - s) * base_energy;
-        let target_energy_field = base_energy + (accumulated_holonomy * 0.01);
-        let h_tsp = s * (target_energy_field * protected_spectral_gap);
-
-        h_0 + h_tsp
-    }
-
-    /// NEW: Cosmic Conceptual Collapse Engine (TACO Across Timelines)
+/// NEW: Cosmic Conceptual Collapse Engine (TACO Across Timelines)
     #[allow(clippy::needless_range_loop)]
     pub fn execute_topological_collapse(&self) -> f64 {
         let total_ants = 20;
@@ -44,7 +10,9 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
         }
 
         let grad = self.config.compute_manifold_gradient(&state_matrix);
-        let omega = self.config.apply_skew_symmetric_rotator(&state_matrix, &grad);
+        let omega = self
+            .config
+            .apply_skew_symmetric_rotator(&state_matrix, &grad);
         let propagator = self.config.compute_matrix_exponential(&omega);
 
         for ant in 0..total_ants {
@@ -99,7 +67,9 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
             if total_tour_cost < global_best_cost {
                 global_best_cost = total_tour_cost;
                 let state_key = format!("AntPath_Best_{}", ant);
-                self.state.state_observer.insert(state_key, global_best_cost);
+                self.state
+                    .state_observer
+                    .insert(state_key, global_best_cost);
             }
         }
 
