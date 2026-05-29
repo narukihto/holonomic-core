@@ -1,73 +1,111 @@
-/// Continuous Adiabatic Evolution and Symplectic Manifold Trajectory Integrator.
-pub struct AdiabaticEvolutionEngine<const N: usize> {
-    pub adiabatic_time: f64,
-    pub spectral_gap_coefficient: f64,
+use crate::observer::HolonomicSystemState;
+use crate::physics::QuantumBundleConfig;
+
+/// Core Hybrid Topological-Heuristic TSP Solver operating via Cosmic Gauge Guidance.
+pub struct HolonomicQuantumSolver<const N: usize> {
+    pub config: QuantumBundleConfig<N>,
+    pub state: HolonomicSystemState,
 }
 
-impl<const N: usize> AdiabaticEvolutionEngine<N> {
-    /// Instantiates a new Evolution Engine with verified runtime invariants.
-    pub fn new(adiabatic_time: f64) -> Self {
+impl<const N: usize> HolonomicQuantumSolver<N> {
+    pub fn new(config: QuantumBundleConfig<N>) -> Self {
         Self {
-            adiabatic_time,
-            // Polynomial scaling index parameter (c) enforcing ΔE(t) >= 1 / (n^c)
-            spectral_gap_coefficient: 2.0,
+            config,
+            state: HolonomicSystemState::default(),
         }
     }
 
-    /// Evaluates the protected minimum spectral energy gap at a specific normalized time parameter.
-    /// Bounds the energy transition safely to prevent exponential decay of the state path.
-    pub fn calculate_spectral_gap(&self) -> f64 {
-        let n_dimensional_size = N as f64;
-        // Bounding the energy gap strictly using the polynomial size function: 1 / (n^c)
-        1.0 / n_dimensional_size.powf(self.spectral_gap_coefficient)
-    }
+    /// Models the Adiabatic Transformation protecting the minimum spectral gap invariant.
+    pub fn simulate_adiabatic_evolution(
+        &self,
+        s: f64,
+        base_energy: f64,
+        accumulated_holonomy: f64,
+    ) -> f64 {
+        let n_dimensional_factor = N as f64;
+        let protected_spectral_gap = 1.0 / n_dimensional_factor.powf(2.0);
 
-    /// Blends the foundational Hamiltonian fields dynamically using exact adiabatic homotopy parameters.
-    /// Integrates the non-Abelian gauge holonomy (Berry Phase) directly into the target Hamiltonian.
-    /// s parameter belongs to the strict interval [0.0, 1.0] representing normalized progress.
-    pub fn interpolate_hamiltonian(&self, s: f64, base_energy: f64, accumulated_holonomy: f64) -> f64 {
-        let normalized_progress = s.clamp(0.0, 1.0);
-        let spectral_protection = self.calculate_spectral_gap();
-
-        // H_0 represents the symmetric initial baseline ground state field
-        let h_0_contribution = (1.0 - normalized_progress) * base_energy;
-
-        // H_TSP incorporates the real cost matrix modulated by the exact geometric gauge field phase shift
+        let h_0 = (1.0 - s) * base_energy;
         let target_energy_field = base_energy + (accumulated_holonomy * 0.01);
-        let h_tsp_contribution = normalized_progress * (target_energy_field * spectral_protection);
+        let h_tsp = s * (target_energy_field * protected_spectral_gap);
 
-        h_0_contribution + h_tsp_contribution
+        h_0 + h_tsp
     }
 
-    /// Generates a unified dynamic step delta adjusted according to the Adiabatic Theorem requirements.
-    /// Ensures strictly deterministic polynomial-time execution bounded safely by O(n^4).
-    pub fn calculate_symplectic_step_delta(&self) -> f64 {
-        let total_steps = self.adiabatic_time as usize;
-        if total_steps == 0 {
-            return 1.0; // Fail-safe mathematical fallback to prevent division by zero
-        }
-        1.0 / (total_steps as f64)
-    }
+    /// NEW: Cosmic Conceptual Collapse Engine (TACO Across Timelines)
+    #[allow(clippy::needless_range_loop)]
+    pub fn execute_topological_collapse(&self) -> f64 {
+        let total_ants = 20;
+        let mut global_best_cost = f64::INFINITY;
 
-    /// Simulates a single frame of high-density topological evolution on the state transformation matrix.
-    /// Applies the Lie group propagator matrix back to the current manifold projection state.
-    pub fn evolve_state_tensor(
-        &self, 
-        current_state: &[[f64; N]; N], 
-        propagator: &[[f64; N]; N]
-    ) -> [[f64; N]; N] {
-        let mut evolved_matrix = [[0.0; N]; N];
-
-        // Linear manifold tensor transformation: X_next = X_curr * Propagator
+        let mut state_matrix = [[0.0; N]; N];
         for i in 0..N {
-            for j in 0..N {
-                let mut state_accumulation = 0.0;
-                for k in 0..N {
-                    state_accumulation += current_state[i][k] * propagator[k][j];
+            state_matrix[i][i] = 1.0;
+        }
+
+        let grad = self.config.compute_manifold_gradient(&state_matrix);
+        let omega = self.config.apply_skew_symmetric_rotator(&state_matrix, &grad);
+        let propagator = self.config.compute_matrix_exponential(&omega);
+
+        for ant in 0..total_ants {
+            let root_node = ant % N;
+            let mut system_path = vec![root_node];
+            let mut unvisited = vec![true; N];
+            unvisited[root_node] = false;
+
+            let mut current_energy = 0.0;
+            let mut evolution_step = 0.0;
+            let step_delta = 1.0 / (N as f64);
+
+            for _ in 1..N {
+                let current_node = system_path[system_path.len() - 1];
+                let gauge_factor = self.config.compute_berry_phase_gauge(&system_path);
+                let adiabatic_blend =
+                    self.simulate_adiabatic_evolution(evolution_step, current_energy, gauge_factor);
+
+                let mut best_next_node = usize::MAX;
+                let mut maximum_field_potential = f64::MIN;
+
+                for candidate in 0..N {
+                    if unvisited[candidate] {
+                        let distance = self.config.distance_matrix[current_node][candidate];
+                        let heuristic_force = 1.0 / (distance + 1e-6);
+                        let topological_force = propagator[current_node][candidate].abs();
+
+                        let total_force =
+                            (heuristic_force * 0.4) + (topological_force * 0.6 * adiabatic_blend);
+
+                        if total_force > maximum_field_potential {
+                            maximum_field_potential = total_force;
+                            best_next_node = candidate;
+                        }
+                    }
                 }
-                evolved_matrix[i][j] = state_accumulation;
+
+                if best_next_node == usize::MAX {
+                    break;
+                }
+
+                unvisited[best_next_node] = false;
+                current_energy += self.config.distance_matrix[current_node][best_next_node];
+                system_path.push(best_next_node);
+                evolution_step += step_delta;
+            }
+
+            let final_node = system_path[system_path.len() - 1];
+            let total_tour_cost =
+                current_energy + self.config.distance_matrix[final_node][root_node];
+
+            if total_tour_cost < global_best_cost {
+                global_best_cost = total_tour_cost;
+                let state_key = format!("AntPath_Best_{}", ant);
+                self.state.state_observer.insert(state_key, global_best_cost);
             }
         }
-        evolved_matrix
+
+        self.state
+            .state_observer
+            .insert("System_Ground_State".to_string(), global_best_cost);
+        global_best_cost
     }
 }
