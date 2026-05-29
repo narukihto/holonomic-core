@@ -2,9 +2,9 @@ name: Absolute SSDT-Kernel Continuous Integration
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ clod, master ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ clod, master ]
 
 env:
   CARGO_TERM_COLOR: always
