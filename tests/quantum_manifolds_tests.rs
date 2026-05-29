@@ -1,9 +1,9 @@
-use holonomic_tsp_core::{QuantumBundleConfig, HolonomicQuantumSolver};
+use holonomic_tsp_core::{HolonomicQuantumSolver, QuantumBundleConfig};
 
 #[test]
 fn test_skew_symmetric_rotator_purity_and_invariants() {
     const N: usize = 4;
-    
+
     // Non-trivial spatial distance grid to feed the manifold gradient
     let distance_matrix = [
         [0.0, 4.2, 9.1, 2.5],
@@ -20,7 +20,7 @@ fn test_skew_symmetric_rotator_purity_and_invariants() {
     };
 
     let solver = HolonomicQuantumSolver::new(config);
-    
+
     // Constructing a high-density non-orthogonal sample test state matrix
     let sample_state = [
         [0.4, 0.6, 0.0, 0.0],
@@ -49,11 +49,11 @@ fn test_skew_symmetric_rotator_purity_and_invariants() {
 #[test]
 fn test_adversarial_uniform_matrix_deceptive_convergence() {
     const N: usize = 5;
-    
+
     // Deceptive worst-case adversarial matrix where all path costs are uniformly distributed.
     // Classical algorithms fail or take exponential paths due to degenerate local valleys.
     let adversarial_matrix = [[15.0; N]; N];
-    
+
     let config = QuantumBundleConfig {
         distance_matrix: adversarial_matrix,
         adiabatic_time: 100.0,
@@ -65,18 +65,20 @@ fn test_adversarial_uniform_matrix_deceptive_convergence() {
     let result_state = solver.execute_topological_collapse();
 
     // Invariants assertion checking for deadlock clearance and structural integrity
-    assert!(result_state.is_finite(), "Manifold solution collapsed into an invalid float state.");
-    assert!(result_state > 0.0, "Physical system collapsed below ground zero energy limits.");
+    assert!(
+        result_state.is_finite(),
+        "Manifold solution collapsed into an invalid float state."
+    );
+    assert!(
+        result_state > 0.0,
+        "Physical system collapsed below ground zero energy limits."
+    );
 }
 
 #[test]
 fn test_concurrent_observer_data_race_safety_under_load() {
     const N: usize = 3;
-    let distance_matrix = [
-        [0.0, 5.0, 8.0],
-        [5.0, 0.0, 2.0],
-        [8.0, 2.0, 0.0],
-    ];
+    let distance_matrix = [[0.0, 5.0, 8.0], [5.0, 0.0, 2.0], [8.0, 2.0, 0.0]];
 
     let config = QuantumBundleConfig {
         distance_matrix,
@@ -86,17 +88,20 @@ fn test_concurrent_observer_data_race_safety_under_load() {
     };
 
     let solver = HolonomicQuantumSolver::new(config);
-    
+
     // Triggering dense parallel execution paths to enforce concurrent thread load on DashMap
     let ground_state = solver.execute_topological_collapse();
 
     // Verify that multi-threaded writers mutated the global state observer cache without data races
     let final_cached_energy = solver.state.state_observer.get("System_Ground_State");
-    
-    assert!(final_cached_energy.is_some(), "Concurrent observer failed to lock or record global ground state.");
+
+    assert!(
+        final_cached_energy.is_some(),
+        "Concurrent observer failed to lock or record global ground state."
+    );
     assert_eq!(
-        *final_cached_energy.unwrap(), 
-        ground_state, 
+        *final_cached_energy.unwrap(),
+        ground_state,
         "State observer recorded value mismatched the analytical calculation results."
     );
 }
@@ -114,16 +119,18 @@ fn test_adiabatic_spectral_gap_polynomial_bound() {
     };
 
     let solver = HolonomicQuantumSolver::new(config);
-    
+
     // Testing specific interpolation points s inside [0.0, 1.0]
     let base_test_energy = 50.0;
-    
-    let energy_at_s_0 = solver.simulate_adiabatic_evolution(0.0, base_test_energy);
-    let energy_at_s_1 = solver.simulate_adiabatic_evolution(1.0, base_test_energy);
+    let simulated_holonomy = 0.0; // Baseline field projection for test isolation
+
+    // Verification calls updated with the accumulated holonomy parameter to match new signature
+    let energy_at_s_0 = solver.simulate_adiabatic_evolution(0.0, base_test_energy, simulated_holonomy);
+    let energy_at_s_1 = solver.simulate_adiabatic_evolution(1.0, base_test_energy, simulated_holonomy);
 
     // Asserting that the initial state energy corresponds to baseline H_0
     assert_eq!(energy_at_s_0, base_test_energy);
-    
+
     // Asserting that target energy is safely bounded and protected by the polynomial gap factor
     let minimum_allowed_gap = 1.0 / (N as f64).powf(2.0);
     assert_eq!(energy_at_s_1, base_test_energy * minimum_allowed_gap);
