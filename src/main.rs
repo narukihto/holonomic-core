@@ -26,7 +26,10 @@ fn main() {
     };
 
     println!("[MANIFOLD INIT] Projecting network topology onto 2D non-Abelian anyonic grid...");
-    println!("[MANIFOLD INIT] Generating SU(n) cross-sections for {} local cluster nodes...", NETWORK_SIZE);
+    println!(
+        "[MANIFOLD INIT] Generating SU(n) cross-sections for {} local cluster nodes...",
+        NETWORK_SIZE
+    );
 
     let solver = HolonomicQuantumSolver::new(config);
 
