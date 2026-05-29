@@ -77,6 +77,7 @@ fn test_adversarial_uniform_matrix_deceptive_convergence() {
 }
 
 #[test]
+#[allow(dead_code)] // تخطي تنبيه عدم استخدام الثوابت بشكل صريح ونظيف
 fn test_concurrent_observer_data_race_safety_under_load() {
     const N: usize = 3;
     let distance_matrix = [[0.0, 5.0, 8.0], [5.0, 0.0, 2.0], [8.0, 2.0, 0.0]];
@@ -105,9 +106,6 @@ fn test_concurrent_observer_data_race_safety_under_load() {
         ground_state,
         "State observer recorded value mismatched the analytical calculation results."
     );
-
-    // Explicitly reference N to eliminate dead_code warning artifacts safely
-    assert!(N > 0);
 }
 
 #[test]
