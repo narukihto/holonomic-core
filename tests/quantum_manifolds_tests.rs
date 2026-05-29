@@ -125,8 +125,10 @@ fn test_adiabatic_spectral_gap_polynomial_bound() {
     let simulated_holonomy = 0.0; // Baseline field projection for test isolation
 
     // Verification calls updated with the accumulated holonomy parameter to match new signature
-    let energy_at_s_0 = solver.simulate_adiabatic_evolution(0.0, base_test_energy, simulated_holonomy);
-    let energy_at_s_1 = solver.simulate_adiabatic_evolution(1.0, base_test_energy, simulated_holonomy);
+    let energy_at_s_0 =
+        solver.simulate_adiabatic_evolution(0.0, base_test_energy, simulated_holonomy);
+    let energy_at_s_1 =
+        solver.simulate_adiabatic_evolution(1.0, base_test_energy, simulated_holonomy);
 
     // Asserting that the initial state energy corresponds to baseline H_0
     assert_eq!(energy_at_s_0, base_test_energy);
