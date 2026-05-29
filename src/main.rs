@@ -28,12 +28,15 @@ fn main() {
     };
 
     println!("[MANIFOLD INIT] Projecting dense matrix grid mapping onto TACO framework...");
-    println!("[MANIFOLD INIT] System Size: {} fully interconnected optimization nodes.", NETWORK_SIZE);
+    println!(
+        "[MANIFOLD INIT] System Size: {} fully interconnected optimization nodes.",
+        NETWORK_SIZE
+    );
 
     let solver = HolonomicQuantumSolver::new(config);
 
     println!("[EVOLUTION] Streaming Berry Phase forces down through topological ant tracks...");
-    
+
     // Fire the calculation instantly
     let final_energy_state = solver.execute_topological_collapse();
 
