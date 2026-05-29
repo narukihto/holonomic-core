@@ -75,6 +75,7 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
     }
 
     /// Computes the exact Frobenius matrix gradient including the orthogonal constraint penalty tracing parameters.
+    #[allow(clippy::needless_range_loop)]
     pub fn compute_manifold_gradient(&self, state_matrix: &[[f64; N]; N]) -> [[f64; N]; N] {
         let mut grad = [[0.0; N]; N];
         let gamma = self.config.penalty_gamma;
@@ -161,6 +162,7 @@ impl<const N: usize> HolonomicQuantumSolver<N> {
     }
 
     /// Executes the non-destructive topological charge collapse to resolve the exact optimal tour layout.
+    #[allow(clippy::needless_range_loop)]
     pub fn execute_topological_collapse(&self) -> f64 {
         let root_node = 0;
         let branches: Vec<usize> = (1..N).collect();
