@@ -1,1 +1,34 @@
+[package]
+name = "holonomic-tsp-core"
+version = "2.0.0"
+edition = "2021"
+authors = ["The Silent Mastermind <anon@crypt.net>"]
+description = "Deterministic Exact Holonomic Quantum Simulation Layout for TSP Verification"
 
+[lib]
+name = "holonomic_tsp_core"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ssdt_solver_exec"
+path = "src/main.rs"
+
+[dependencies]
+# Thread-safe concurrent global caches for real-time quantum telemetry tracking
+dashmap = "6.0.0"
+
+# Hardware-level parallel processing flow engine for high-density Lie algebra matrix operations
+rayon = "1.10.0"
+
+[profile.release]
+# Maximum optimization level for zero-cost abstractions
+opt-level = 3
+
+# Enable Link-Time Optimization across all crates for deep architectural binary stripping
+lto = true
+
+# Reduce parallel compilation blocks to 1 to unleash maximum compiler global analysis optimizations
+codegen-units = 1
+
+# Abort instantly on panic to secure the continuous memory bundle and enforce predictable exit codes
+panic = "abort"
