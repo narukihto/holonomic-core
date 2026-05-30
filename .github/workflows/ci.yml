@@ -1,1 +1,50 @@
+name: ARK-Penta-V Sovereign Integrity Pipeline
 
+on:
+  push:
+    branches: [ clod ]
+  pull_request:
+    branches: [ clod ]
+
+env:
+  CARGO_TERM_COLOR: always
+  
+  RUSTFLAGS: "-D warnings -C target-feature=+crt-static"
+
+jobs:
+  sovereign-verification:
+    name: Formal Mathematical and Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Sovereign State
+        uses: actions/checkout@v4
+
+      - name: Setup Sovereign Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache Build Dependencies
+        uses: swatinem/rust-cache@v2
+
+      - name: Audit Formal Syntax (Rustfmt)
+        run: cargo fmt --all -- --check
+
+      - name: Zero-Tolerance Static Analysis (Clippy)
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Mathematical Integrity and Invariant Verification
+        run: |
+          # هنا يتم التأكد من أن التحدب (Convexity) والخصائص الجيوديسية
+          # لم يتم العبث بها في أي تعديل برمجية
+          cargo test --verbose -- --ignored
+
+      - name: Sovereign Release Build
+        run: cargo build --release --verbose
+
+      - name: Security Audit (LWE Compliance Check)
+        run: |
+          # التحقق من أن طبقة التشفير LWE لم تتعرض لأي تداخلات منطقية
+          # هذا هو خط الدفاع الأخير قبل اعتبار النظام مستقراً
+          cargo run --example lwe_compliance_test
