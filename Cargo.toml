@@ -15,7 +15,9 @@ path = "src/main.rs"
 
 [dependencies]
 # Thread-safe concurrent global caches for real-time quantum telemetry tracking
+rug = "1.24.0"
 dashmap = "6.0.0"
+rayon = "1.10.0"
 
 # Hardware-level parallel processing flow engine for high-density Lie algebra matrix operations
 rayon = "1.10.0"
