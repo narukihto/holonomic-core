@@ -1,5 +1,5 @@
-use ark_penta_v_core::crypto::lwe::sign_manifold;
 use ark_penta_v_core::core::tension::TensionMatrix;
+use ark_penta_v_core::crypto::lwe::sign_manifold;
 
 fn main() {
     let raw_data = vec![vec![1.0, 0.5], vec![0.5, 1.0]];
