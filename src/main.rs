@@ -1,5 +1,4 @@
 //! # ARK-Penta-V Sovereign Core Executor
-//!
 //! The entry point for the sovereign kernel. Orchestrates the initialization
 //! of the resonance lattice and triggers the geodesic collapse of the problem manifold.
 
