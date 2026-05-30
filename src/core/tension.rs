@@ -31,7 +31,6 @@ impl TensionMatrix {
                     let dist_sq: Float = dist.clone().pow(2);
                     let sigma_sq: Float = sigma.clone().pow(2);
                     
-                    // الطريقة الصحيحة: إجراء الضرب وتخزينه في Float مستقلة
                     let mut denom = Float::with_val(128, &two * &sigma_sq);
                     
                     let mut exponent: Float = dist_sq;
