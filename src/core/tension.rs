@@ -3,6 +3,7 @@
 //! It processes the topological resistance Omega_ij using high-precision
 //! arbitrary arithmetic to force absolute geodesic convergence.
 
+use rug::ops::Pow;
 use rug::Float;
 
 pub struct TensionMatrix {
@@ -32,7 +33,8 @@ impl TensionMatrix {
             for j in 0..self.size {
                 if i != j {
                     let dist = &self.data[i][j];
-                    let exponent = -(dist.pow(2) / (&two * sigma.pow(2)));
+                    // استخدام clone() لحل مشكلة الملكية مع rug::Float
+                    let exponent = -(dist.clone().pow(2) / (&two * sigma.clone().pow(2)));
                     self.data[i][j] = exponent.exp();
                 } else {
                     self.data[i][j] = Float::with_val(128, 0.0);
