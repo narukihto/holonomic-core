@@ -4,7 +4,7 @@ pub mod evolution;
 pub mod observer;
 pub mod physics;
 
-pub use crate::core::manifold::SovereignManifold;
+pub use crate::core::manifold::{HolonomicQuantumSolver, QuantumBundleConfig, SovereignManifold};
 pub use crate::core::tension::TensionMatrix;
 pub use crate::evolution::collapse_to_optimum;
 pub use crate::observer::start_heartbeat;
