@@ -1,5 +1,4 @@
 //! # Tension Matrix Engine
-//! 
 //! This module defines the stress relationships within the ARK manifold.
 //! It processes the topological resistance Omega_ij using high-precision 
 //! arbitrary arithmetic to force absolute geodesic convergence.
