@@ -28,20 +28,24 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     state.path
 }
 
+fn calculate_gradient(path: &[usize], tension: &TensionMatrix) -> Vec<Float> {
+    path.iter()
+        .map(|&node| {
+            let mut force = Float::with_val(128, 0.0);
+            for j in 0..tension.size {
+                force += &tension.data[node][j];
+            }
+            force
+        })
+        .collect()
+}
+
 fn refine_geodesic(path: Vec<usize>, gradient: &[Float]) -> Vec<usize> {
     let mut new_path = path;
     new_path.sort_by(|&a, &b| {
         gradient[a]
             .partial_cmp(&gradient[b])
             .unwrap_or(std::cmp::Ordering::Equal)
-    });
-    new_path
-}
-
-fn refine_geodesic(path: Vec<usize>, gradient: &[Float]) -> Vec<usize> {
-    let mut new_path = path;
-    new_path.sort_by(|&a, &b| {
-        gradient[a].partial_cmp(&gradient[b]).unwrap_or(std::cmp::Ordering::Equal)
     });
     new_path
 }
