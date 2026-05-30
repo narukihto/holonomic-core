@@ -1,7 +1,7 @@
 use crate::core::tension::TensionMatrix;
 
 pub struct QuantumBundleConfig {
-    pub distance_matrix: [[f64; 3]; 3],
+    pub distance_matrix: Vec<Vec<f64>>,
     pub adiabatic_time: f64,
     pub coupling_constant: f64,
     pub penalty_gamma: f64,
