@@ -1,5 +1,4 @@
 //! # Space Folding Engine
-//! 
 //! This module defines the Riemannian manifold $\mathcal{M}_{ARK}$.
 //! It transforms discrete spatial nodes into a continuous potential field.
 
