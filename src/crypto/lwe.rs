@@ -26,8 +26,13 @@ pub fn sign_manifold(matrix: &TensionMatrix) -> SovereignSignature {
 }
 
 fn generate_lattice_noise(matrix: &TensionMatrix) -> f64 {
-    // نقوم بتحويل كل Float من مكتبة rug إلى f64 قبل الجمع
-    matrix.data.iter().flatten().map(|f| f.to_f64()).sum::<f64>() % 0.01
+    matrix
+        .data
+        .iter()
+        .flatten()
+        .map(|f| f.to_f64())
+        .sum::<f64>()
+        % 0.01
 }
 
 fn verify_integrity(matrix: &TensionMatrix, noise: &f64) -> bool {
