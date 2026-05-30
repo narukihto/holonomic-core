@@ -9,10 +9,11 @@ pub mod evolution;
 pub mod observer;
 pub mod physics;
 
-// الآن يمكنك استدعاء الدوال مباشرة من الوحدة
+use crate::core::manifold::SovereignManifold;
 use crate::evolution::collapse_to_optimum;
 use crate::observer::start_heartbeat;
 use crate::physics::calibrate_resonance_lattice;
+
 /// Entry point for the "Sovereign Collapse" process.
 /// This function maps input nodes into a Geodesic Manifold and anchors the result against tampering.
 pub fn execute_sovereign_collapse<const N: usize>(nodes: &[[f64; 2]; N]) -> Vec<usize> {
@@ -29,12 +30,13 @@ pub fn execute_sovereign_collapse<const N: usize>(nodes: &[[f64; 2]; N]) -> Vec<
     }
     
     // 3. Trigger the Adiabatic Collapse (Geodesic Flow)
-    // The solution emerges as a natural equilibrium state of the manifold.
-    evolution::mod::collapse_to_optimum(tension)
+    // Removed 'mod::' to respect Rust's module resolution rules.
+    collapse_to_optimum(tension)
 }
 
 /// Initialize the Kernel Heartbeat and calibrate the resonance lattice.
 pub fn init_sovereign_core() {
-    observer::mod::start_heartbeat();
-    physics::mod::calibrate_resonance_lattice();
+    // Removed 'mod::' for direct module invocation.
+    start_heartbeat();
+    calibrate_resonance_lattice();
 }
