@@ -1,5 +1,4 @@
 //! # ARK-Penta-V Sovereign Core
-//! 
 //! Sovereign kernel for managing geometric stability and topological collapse of combinatorial problems.
 //! This crate integrates the Ricci-ARK engine for Geodesic Flow with the Penta-V security substrate.
 
