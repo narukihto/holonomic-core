@@ -8,8 +8,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  
-  RUSTFLAGS: "-D warnings -C target-feature=+crt-static"
+  # فرض صرامة تامة على الكود ومنع أي تجاوزات في الذاكرة
+  RUSTFLAGS: "-D warnings -C target-feature=+crt-static -C link-arg=-s"
 
 jobs:
   sovereign-verification:
@@ -35,16 +35,18 @@ jobs:
         run: cargo clippy --all-targets --all-features -- -D warnings
 
       - name: Mathematical Integrity and Invariant Verification
+        run: cargo test --verbose
+
+      - name: Sovereign Stress Test (High-Load Stability)
         run: |
-          # هنا يتم التأكد من أن التحدب (Convexity) والخصائص الجيوديسية
-          # لم يتم العبث بها في أي تعديل برمجية
-          cargo test --verbose -- --ignored
+          # اختبار استقرار المانيفولد تحت ضغط عالي (Stress Testing)
+          # هذا يضمن أن النظام لا ينهار في فضاءات الأبعاد العالية
+          cargo test --test holonomic_tests -- --ignored --nocapture
 
       - name: Sovereign Release Build
         run: cargo build --release --verbose
 
       - name: Security Audit (LWE Compliance Check)
         run: |
-          # التحقق من أن طبقة التشفير LWE لم تتعرض لأي تداخلات منطقية
-          # هذا هو خط الدفاع الأخير قبل اعتبار النظام مستقراً
+          # التحقق من أن طبقة التشفير LWE سليمة ولم تتعرض للتهكير
           cargo run --example lwe_compliance_test
