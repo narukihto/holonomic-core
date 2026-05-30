@@ -52,6 +52,5 @@ fn refine_geodesic(path: Vec<usize>, gradient: &[Float]) -> Vec<usize> {
 
 fn is_zero_or_negligible(gradient: &[Float]) -> bool {
     let epsilon = Float::with_val(128, 1e-20);
-    // استدعاء clone() يحل مشكلة E0507 (Move out of shared reference)
     gradient.iter().all(|g| g.clone().abs() < epsilon)
 }
