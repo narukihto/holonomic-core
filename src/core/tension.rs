@@ -34,12 +34,9 @@ impl TensionMatrix {
                     let dist_sq = dist.clone().pow(2);
                     let sigma_sq = sigma.clone().pow(2);
                     let denom = &two * &sigma_sq;
-                    
-                    // التعديل الجذري: استخدام clone() للنتيجة لضمان ملكية واضحة للـ Float
                     let mut exponent = dist_sq.clone();
                     exponent /= &denom;
                     exponent = -exponent;
-                    
                     self.data[i][j] = exponent.exp();
                 } else {
                     self.data[i][j] = Float::with_val(128, 0.0);
