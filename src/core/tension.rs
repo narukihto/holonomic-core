@@ -1,7 +1,5 @@
 //! # Tension Matrix Engine
 //! This module defines the stress relationships within the ARK manifold.
-//! It processes the topological resistance Omega_ij using high-precision
-//! arbitrary arithmetic to force absolute geodesic convergence.
 
 use rug::ops::Pow;
 use rug::Float;
@@ -33,7 +31,10 @@ impl TensionMatrix {
             for j in 0..self.size {
                 if i != j {
                     let dist = &self.data[i][j];
-                    let exponent: Float = -(dist.clone().pow(2) / (&two * sigma.clone().pow(2)));
+                    let dist_sq = dist.clone().pow(2);
+                    let sigma_sq = sigma.clone().pow(2);
+                    let denom = &two * &sigma_sq;
+                    let exponent: Float = -(&dist_sq / &denom);
                     self.data[i][j] = exponent.exp();
                 } else {
                     self.data[i][j] = Float::with_val(128, 0.0);
