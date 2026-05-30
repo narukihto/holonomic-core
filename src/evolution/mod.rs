@@ -52,5 +52,5 @@ fn refine_geodesic(path: Vec<usize>, gradient: &[Float]) -> Vec<usize> {
 
 fn is_zero_or_negligible(gradient: &[Float]) -> bool {
     let epsilon = Float::with_val(128, 1e-20);
-    gradient.iter().all(|g| g.abs() < *epsilon)
+    gradient.iter().all(|g| g.abs() < &epsilon)
 }
