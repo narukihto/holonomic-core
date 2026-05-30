@@ -33,8 +33,7 @@ impl TensionMatrix {
             for j in 0..self.size {
                 if i != j {
                     let dist = &self.data[i][j];
-                    // استخدام clone() لحل مشكلة الملكية مع rug::Float
-                    let exponent = -(dist.clone().pow(2) / (&two * sigma.clone().pow(2)));
+                    let exponent: Float = -(dist.clone().pow(2) / (&two * sigma.clone().pow(2)));
                     self.data[i][j] = exponent.exp();
                 } else {
                     self.data[i][j] = Float::with_val(128, 0.0);
