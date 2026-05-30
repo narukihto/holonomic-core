@@ -1,5 +1,4 @@
 //! # LWE Sovereign Signature Engine
-//! 
 //! Provides lattice-based integrity verification for the ARK manifold.
 //! This ensures that input constraints and tension matrices remain tamper-proof.
 
