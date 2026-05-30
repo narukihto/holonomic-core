@@ -1,4 +1,4 @@
-use holonomic_tsp_core::{HolonomicQuantumSolver, QuantumBundleConfig};
+use ark_penta_v_core::{HolonomicQuantumSolver, QuantumBundleConfig};
 
 #[test]
 fn test_adiabatic_spectral_gap_polynomial_bound() {
@@ -26,7 +26,6 @@ fn test_skew_symmetric_rotator_purity_and_invariants() {
     let x = [[1.0, 0.0], [0.0, 1.0]];
     let grad = config.compute_manifold_gradient(&x);
     let omega = config.apply_skew_symmetric_rotator(&x, &grad);
-    // Skew-symmetric verification: M + M^T = 0
     assert!((omega[0][1] + omega[1][0]).abs() < 1e-6);
 }
 
