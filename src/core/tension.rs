@@ -30,7 +30,9 @@ impl TensionMatrix {
                     let dist = &self.data[i][j];
                     let dist_sq: Float = dist.clone().pow(2);
                     let sigma_sq: Float = sigma.clone().pow(2);
-                    let denom: Float = &two * &sigma_sq;
+
+                    let denom: Float = (&two * &sigma_sq).into();
+                    
                     let mut exponent: Float = dist_sq;
                     exponent /= &denom;
                     exponent = -exponent;
