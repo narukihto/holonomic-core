@@ -10,9 +10,9 @@ impl TensionMatrix {
     pub fn new(matrix: Vec<Vec<f64>>) -> Self {
         let size = matrix.len();
         let mut data = vec![vec![Float::with_val(128, 0.0); size]; size];
-        for i in 0..size {
-            for j in 0..size {
-                data[i][j] = Float::with_val(128, matrix[i][j]);
+        for (i, row) in matrix.iter().enumerate() {
+            for (j, &val) in row.iter().enumerate() {
+                data[i][j] = Float::with_val(128, val);
             }
         }
         let mut t_matrix = Self { data, size };
@@ -30,7 +30,7 @@ impl TensionMatrix {
                     let dist = &self.data[i][j];
                     let dist_sq: Float = dist.clone().pow(2);
                     let sigma_sq: Float = sigma.clone().pow(2);
-                    let mut denom = Float::with_val(128, &two * &sigma_sq);
+                    let denom = Float::with_val(128, &two * &sigma_sq);
                     let mut exponent: Float = dist_sq;
                     exponent /= &denom;
                     exponent = -exponent;
