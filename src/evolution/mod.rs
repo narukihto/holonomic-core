@@ -1,5 +1,4 @@
 //! # Geodesic Collapse Engine
-//!
 //! This module implements the Ricci-ARK Flow to force the manifold
 //! to converge into a globally optimal geodesic path.
 
