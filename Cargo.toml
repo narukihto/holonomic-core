@@ -6,12 +6,14 @@ authors = ["The Silent Mastermind <anon@crypt.net>"]
 description = "Deterministic Exact Holonomic Quantum Simulation Layout for TSP Verification"
 
 [lib]
-name = "holonomic_tsp_core"
+name = "ark_penta_v_core"
 path = "src/lib.rs"
 
 [[bin]]
 name = "ssdt_solver_exec"
 path = "src/main.rs"
+
+# ... بقية الإعدادات كما هي
 
 [dependencies]
 # Arbitrary-precision arithmetic for zero-error manifold convergence
