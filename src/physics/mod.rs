@@ -1,5 +1,4 @@
 //! # Physical Resonance Constants
-//! 
 //! Defines the fundamental physical constants for the ARK-Penta-V manifold.
 //! These constants calibrate the Geodesic Flow, ensuring the system converges 
 //! at the target resonance frequency.
