@@ -1,7 +1,7 @@
 //! # ARK-Penta-V Sovereign Core
 //! 
-//! نواة سيادية لإدارة الاستقرار الهندسي والانهيار الطوبولوجي للمعضلات التوافقية.
-//! هذا الـ Crate يدمج محرك Ricci-ARK للتدفق الجيوديسي مع طبقة الحماية Penta-V.
+//! Sovereign kernel for managing geometric stability and topological collapse of combinatorial problems.
+//! This crate integrates the Ricci-ARK engine for Geodesic Flow with the Penta-V security substrate.
 
 pub mod core;
 pub mod crypto;
@@ -13,13 +13,14 @@ pub use core::manifold::SovereignManifold;
 pub use core::tension::TensionMatrix;
 pub use crypto::lwe::SovereignSignature;
 
-/// النقطة الدخول الرئيسية لعملية "الانهيار السيادي" (Sovereign Collapse).
-/// تقوم هذه الدالة بأخذ العقد وتحويلها إلى مسار جيوديسي محصن.
+/// Entry point for the "Sovereign Collapse" process.
+/// This function maps input nodes into a Geodesic Manifold and anchors the result against tampering.
 pub fn execute_sovereign_collapse<const N: usize>(nodes: &[[f64; 2]; N]) -> Vec<usize> {
-    // 1. إنشاء الفضاء المانيفولد (Space Folding)
+    // 1. Initialize the Riemannian Manifold (Space Folding)
     let manifold = SovereignManifold::new(nodes);
     
-    // 2. حساب مصفوفة التوتر وتوقيعها (LWE Security)
+    // 2. Compute the tension matrix and generate an LWE signature
+    // Any structural divergence in input constraints will invalidate this signature.
     let tension = manifold.compute_tension_matrix();
     let signature = crypto::lwe::sign_manifold(&tension);
     
@@ -27,11 +28,12 @@ pub fn execute_sovereign_collapse<const N: usize>(nodes: &[[f64; 2]; N]) -> Vec<
         panic!("🚨 Geometric Lockdown: Tampering detected in the Sovereign Core!");
     }
     
-    // 3. محرك الانهيار الأدياباتي (Geodesic Flow)
+    // 3. Trigger the Adiabatic Collapse (Geodesic Flow)
+    // The solution emerges as a natural equilibrium state of the manifold.
     evolution::mod::collapse_to_optimum(tension)
 }
 
-/// تهيئة النظام (Heartbeat Initialization)
+/// Initialize the Kernel Heartbeat and calibrate the resonance lattice.
 pub fn init_sovereign_core() {
     observer::mod::start_heartbeat();
     physics::mod::calibrate_resonance_lattice();
