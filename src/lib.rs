@@ -9,10 +9,10 @@ pub mod evolution;
 pub mod observer;
 pub mod physics;
 
-pub use core::manifold::SovereignManifold;
-pub use core::tension::TensionMatrix;
-pub use crypto::lwe::SovereignSignature;
-
+// الآن يمكنك استدعاء الدوال مباشرة من الوحدة
+use crate::evolution::collapse_to_optimum;
+use crate::observer::start_heartbeat;
+use crate::physics::calibrate_resonance_lattice;
 /// Entry point for the "Sovereign Collapse" process.
 /// This function maps input nodes into a Geodesic Manifold and anchors the result against tampering.
 pub fn execute_sovereign_collapse<const N: usize>(nodes: &[[f64; 2]; N]) -> Vec<usize> {
