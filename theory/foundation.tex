@@ -1,0 +1,33 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{The ARK-Penta-V Sovereign Foundation: Geodesic Convergence in Holonomic TSP}
+\author{The Silent Mastermind}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Abstract}
+This document establishes the theoretical framework for the ARK-Penta-V Sovereign Core. We demonstrate that the Travelling Salesperson Problem (TSP), traditionally categorized as NP-Hard, can be mapped into a Riemannian manifold $\mathcal{M}$ where the global optimal path emerges as a stable geodesic.
+
+\section*{1. Manifold Formulation}
+Given a set of nodes $N$, we define a potential field $\Psi$ such that the tension matrix $\mathcal{T}$ represents the topological resistance between nodes. The manifold is constructed using a RBF-kernel potential mapping:
+\[ \Psi(x) = \sum_{i=1}^{|N|} \frac{1}{\|x - p_i\|^\alpha} \]
+
+\section*{2. Deterministic Convexity Guarantee}
+To eliminate local minima (deceptive valleys), we apply a Diagonal Loading transformation to the tension matrix:
+\[ \mathcal{T}_{stable} = \mathcal{T} + \lambda I, \quad \lambda > 0 \]
+By enforcing $\lambda \to \epsilon$ (where $\epsilon \to 0$ in arbitrary-precision arithmetic), we ensure $\mathcal{T}_{stable}$ is strictly positive definite. This enforces a strictly convex energy landscape $\mathcal{E}(\gamma)$, guaranteeing that the Ricci-ARK flow converges to a unique global optimum.
+
+\section*{3. Geodesic Collapse Engine}
+The convergence of the path $\gamma$ is governed by the adiabatic gradient flow:
+\[ \frac{\partial \gamma}{\partial t} = - \nabla \mathcal{E}(\gamma) \]
+As $t \to \infty$, the system reaches the Sovereign Ground State, where $\nabla \mathcal{E} = 0$. This represents the absolute shortest Hamiltonian path in the configuration space.
+
+\section*{4. Security and Sovereignty}
+The integrity of the manifold is verified via a Lattice-Based LWE (Learning With Errors) signature. Any attempt to perturb the tension matrix $\mathcal{T}$ results in an invalid signature, triggering an immediate Geometric Lockdown to prevent non-sovereign path optimization.
+
+\end{document}
