@@ -1,6 +1,3 @@
-//! # Tension Matrix Engine
-//! This module defines the stress relationships within the ARK manifold.
-
 use rug::ops::Pow;
 use rug::Float;
 
@@ -31,10 +28,10 @@ impl TensionMatrix {
             for j in 0..self.size {
                 if i != j {
                     let dist = &self.data[i][j];
-                    let dist_sq = dist.clone().pow(2);
-                    let sigma_sq = sigma.clone().pow(2);
-                    let denom = &two * &sigma_sq;
-                    let mut exponent = dist_sq.clone();
+                    let dist_sq: Float = dist.clone().pow(2);
+                    let sigma_sq: Float = sigma.clone().pow(2);
+                    let denom: Float = &two * &sigma_sq;
+                    let mut exponent: Float = dist_sq;
                     exponent /= &denom;
                     exponent = -exponent;
                     self.data[i][j] = exponent.exp();
