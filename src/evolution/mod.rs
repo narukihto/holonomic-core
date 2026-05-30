@@ -62,5 +62,8 @@ fn refine_geodesic(path: Vec<usize>, gradient: Vec<Float>) -> Vec<usize> {
 /// Checks if the energy gradient has reached the stable sovereign threshold.
 fn is_zero_or_negligible(gradient: &[Float]) -> bool {
     let epsilon = Float::with_val(128, 1e-20);
+    // إزالة الـ & لحل مشكلة الـ Trait للمقارنة
+    gradient.iter().all(|g| g.abs() < epsilon)
+}
     gradient.iter().all(|g| g.abs() < &epsilon)
 }
