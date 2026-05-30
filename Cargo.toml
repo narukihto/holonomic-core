@@ -14,10 +14,11 @@ name = "ssdt_solver_exec"
 path = "src/main.rs"
 
 [dependencies]
-# Thread-safe concurrent global caches for real-time quantum telemetry tracking
+# Arbitrary-precision arithmetic for zero-error manifold convergence
 rug = "1.24.0"
+
+# Thread-safe concurrent global caches for real-time quantum telemetry tracking
 dashmap = "6.0.0"
-rayon = "1.10.0"
 
 # Hardware-level parallel processing flow engine for high-density Lie algebra matrix operations
 rayon = "1.10.0"
@@ -33,4 +34,8 @@ lto = true
 codegen-units = 1
 
 # Abort instantly on panic to secure the continuous memory bundle and enforce predictable exit codes
+# This ensures the kernel remains in a "Known-Good" or "Stopped" state only.
 panic = "abort"
+
+# Ensure panic symbols are stripped to reduce binary size and harden security
+strip = true
