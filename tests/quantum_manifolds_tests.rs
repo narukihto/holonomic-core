@@ -2,7 +2,11 @@ use ark_penta_v_core::{HolonomicQuantumSolver, QuantumBundleConfig};
 
 #[test]
 fn test_adiabatic_spectral_gap_polynomial_bound() {
-    let distance_matrix = [[0.0, 10.0, 15.0], [10.0, 0.0, 35.0], [15.0, 35.0, 0.0]];
+    let distance_matrix = vec![
+        vec![0.0, 10.0, 15.0],
+        vec![10.0, 0.0, 35.0],
+        vec![15.0, 35.0, 0.0],
+    ];
     let config = QuantumBundleConfig {
         distance_matrix,
         adiabatic_time: 10.0,
@@ -16,7 +20,7 @@ fn test_adiabatic_spectral_gap_polynomial_bound() {
 
 #[test]
 fn test_skew_symmetric_rotator_purity_and_invariants() {
-    let distance_matrix = [[0.0, 4.0], [4.0, 0.0]];
+    let distance_matrix = vec![vec![0.0, 4.0], vec![4.0, 0.0]];
     let config = QuantumBundleConfig {
         distance_matrix,
         adiabatic_time: 5.0,
@@ -31,11 +35,11 @@ fn test_skew_symmetric_rotator_purity_and_invariants() {
 
 #[test]
 fn test_adversarial_uniform_matrix_deceptive_convergence() {
-    let distance_matrix = [
-        [0.0, 5.0, 5.0, 5.0],
-        [5.0, 0.0, 5.0, 5.0],
-        [5.0, 5.0, 0.0, 5.0],
-        [5.0, 5.0, 5.0, 0.0],
+    let distance_matrix = vec![
+        vec![0.0, 5.0, 5.0, 5.0],
+        vec![5.0, 0.0, 5.0, 5.0],
+        vec![5.0, 5.0, 0.0, 5.0],
+        vec![5.0, 5.0, 5.0, 0.0],
     ];
     let config = QuantumBundleConfig {
         distance_matrix,
@@ -50,7 +54,7 @@ fn test_adversarial_uniform_matrix_deceptive_convergence() {
 
 #[test]
 fn test_concurrent_observer_data_race_safety_under_load() {
-    let distance_matrix = [[0.0, 12.0], [12.0, 0.0]];
+    let distance_matrix = vec![vec![0.0, 12.0], vec![12.0, 0.0]];
     let config = QuantumBundleConfig {
         distance_matrix,
         adiabatic_time: 1.0,
