@@ -1,5 +1,4 @@
 //! # Sovereign State Observer
-//! 
 //! Monitors the structural integrity and resonance frequency of the ARK manifold.
 //! This module ensures the system remains within its defined sovereign boundaries.
 
