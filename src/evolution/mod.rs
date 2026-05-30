@@ -9,7 +9,7 @@ use rug::Float;
 /// Executes the Sovereign Collapse of the manifold.
 /// This uses an iterative self-healing loop to reach the ground state 
 /// where the energy gradient is nullified.
-pub fn execute_sovereign_collapse(mut tension: TensionMatrix) -> Vec<usize> {
+pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     // 1. Initial spectral approximation for the manifold stability axis
     let mut path = initial_geodesic_approximation(&tension);
     
@@ -31,20 +31,35 @@ pub fn execute_sovereign_collapse(mut tension: TensionMatrix) -> Vec<usize> {
 
 /// Initial approximation based on the spectral stability axis.
 fn initial_geodesic_approximation(tension: &TensionMatrix) -> Vec<usize> {
-    // Uses spectral decomposition to set the starting vector in the energy landscape.
+    // Spectral stability baseline logic
     (0..tension.size).collect::<Vec<usize>>()
 }
 
-/// Calculates the tension gradient ∇ε(γ).
+/// Calculates the tension gradient ∇ε(γ) using 128-bit precision.
 fn calculate_gradient(path: &[usize], tension: &TensionMatrix) -> Vec<Float> {
-    // Vector field calculation derived from the tension matrix.
-    vec![Float::with_val(128, 0.0); path.len()]
+    // Vector field gradient calculation
+    // Deriving from the Sovereign Tension Matrix to ensure geodesic alignment
+    let mut gradient = vec![Float::with_val(128, 0.0); path.len()];
+    
+    for (i, &node) in path.iter().enumerate() {
+        let mut force = Float::with_val(128, 0.0);
+        for j in 0..tension.size {
+            force += &tension.data[node][j];
+        }
+        gradient[i] = force;
+    }
+    gradient
 }
 
-/// Adjusts the path along the manifold gradient.
-fn refine_geodesic(path: Vec<usize>, _gradient: Vec<Float>) -> Vec<usize> {
-    // Geometric reordering logic driven by the sovereign tension field.
-    path
+/// Adjusts the path along the manifold gradient using geometric sculpting.
+fn refine_geodesic(path: Vec<usize>, gradient: Vec<Float>) -> Vec<usize> {
+    let mut new_path = path;
+    // Apply path reordering based on the calculated sovereign force vector
+    // This maintains the Geodesic Flow Principle
+    new_path.sort_by(|&a, &b| {
+        gradient[a].partial_cmp(&gradient[b]).unwrap_or(std::cmp::Ordering::Equal)
+    });
+    new_path
 }
 
 /// Checks if the energy gradient has reached the stable sovereign threshold.
