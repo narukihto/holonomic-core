@@ -1,40 +1,33 @@
-use holonomic_tsp_core::{HolonomicQuantumSolver, QuantumBundleConfig};
+//! # ARK-Penta-V Sovereign Core Executor
+//! 
+//! The entry point for the sovereign kernel. Orchestrates the initialization
+//! of the resonance lattice and triggers the geodesic collapse of the problem manifold.
 
-#[allow(clippy::needless_range_loop)]
+use ark_penta_v_core::{init_sovereign_core, execute_sovereign_collapse};
+
 fn main() {
-    println!("=========================================================================");
-    println!("===   HYBRID COSMIC TOPOLOGICAL QUANTUM SOLVER CORE INITIALIZING      ===");
-    println!("=========================================================================");
+    // 1. Initialize the Sovereign Core heartbeat and resonance lattice.
+    // This establishes the geometric baseline for all subsequent operations.
+    init_sovereign_core();
+    
+    println!("🏛️ ARK-Penta-V Core Initialized. Sovereign Mode: ACTIVE.");
 
-    const NETWORK_SIZE: usize = 20;
+    // 2. Define the problem constraints (Problem nodes in 2D space).
+    // In a production scenario, these nodes are ingested via the Sovereign Bridge.
+    let nodes: [[f64; 2]; 4] = [
+        [0.0, 0.0],
+        [1.0, 5.0],
+        [5.0, 2.0],
+        [3.0, 0.0],
+    ];
 
-    let mut distance_matrix = [[0.0; NETWORK_SIZE]; NETWORK_SIZE];
-    for i in 0..NETWORK_SIZE {
-        for j in 0..NETWORK_SIZE {
-            if i != j {
-                let cost = (((i * 7 + j * 13) % 45) + 5) as f64;
-                distance_matrix[i][j] = cost;
-            }
-        }
-    }
+    println!("📐 Folding manifold for {} nodes...", nodes.len());
 
-    let config = QuantumBundleConfig {
-        distance_matrix,
-        adiabatic_time: 500.0,
-        coupling_constant: 0.08,
-        penalty_gamma: 15.0,
-    };
+    // 3. Trigger the Sovereign Collapse.
+    // The solution is not computed; it is 'collapsed' into an optimal geodesic state.
+    let optimal_path = execute_sovereign_collapse(&nodes);
 
-    println!("[MANIFOLD] Projecting Cosmic Dao Matrix Grid onto TACO Engine...");
-    let solver = HolonomicQuantumSolver::new(config);
-
-    println!("[EVOLUTION] Unleashing Karmic paths across 11 dimensions...");
-    let final_energy_state = solver.execute_topological_collapse();
-
-    println!("\n[COLLAPSE SUCCESS] Enlightenment attained instantaneously.");
-    println!(
-        ">> Absolute Ground State Tour Cost Discovered: {:.4}",
-        final_energy_state
-    );
-    println!("=========================================================================");
+    // 4. Output the stable state signature.
+    println!("✅ Sovereign Execution Complete.");
+    println!("Path: {:?}", optimal_path);
 }
