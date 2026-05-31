@@ -1,4 +1,4 @@
-use rug::ops::Pow;
+// src/core/tension.rs
 use rug::Float;
 
 pub struct TensionMatrix {
@@ -18,7 +18,7 @@ impl TensionMatrix {
         Self { data, size }
     }
 
-    pub fn enforce_terminal_boundary(&mut self, t_max: f64) {
+    pub fn enforce_terminal_boundary(&mut self, _t_max: f64) {
         let decay_factor = Float::with_val(128, (-10.0f64).exp());
         for i in 0..self.size {
             for j in 0..self.size {
