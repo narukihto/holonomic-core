@@ -8,7 +8,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: "-D warnings -C target-feature=+crt-static -C link-arg=-s"
 
 jobs:
   sovereign-verification:
@@ -43,6 +42,8 @@ jobs:
 
       - name: Sovereign Release Build
         run: cargo build --release --verbose
+        env:
+          RUSTFLAGS: "-D warnings -C target-feature=+crt-static -C link-arg=-s"
 
       - name: Security Audit
         run: cargo run --example lwe_compliance_test
