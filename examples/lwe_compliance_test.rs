@@ -1,7 +1,7 @@
 use ark_penta_v_core::core::tension::TensionMatrix;
 use ark_penta_v_core::crypto::lwe::sign_manifold_async;
-use tokio::sync::mpsc;
 use std::sync::Arc;
+use tokio::sync::mpsc;
 
 fn main() {
     let rt = tokio::runtime::Builder::new_current_thread()
