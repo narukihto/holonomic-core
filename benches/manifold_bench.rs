@@ -9,7 +9,7 @@ fn bench_sovereign_collapse(c: &mut Criterion) {
     };
 
     c.bench_function("sovereign_collapse_5_nodes", |b| {
-        b.iter(|| execute_sovereign_collapse(black_box(config.clone()), black_box(nodes.clone())))
+        b.iter(|| execute_sovereign_collapse(black_box(&config), black_box(&nodes)))
     });
 }
 
