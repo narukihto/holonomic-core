@@ -1,15 +1,21 @@
 use ark_penta_v_core::core::tension::TensionMatrix;
-use ark_penta_v_core::crypto::lwe::sign_manifold;
+use ark_penta_v_core::crypto::lwe::sign_manifold_async;
+use tokio::sync::mpsc;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let raw_data = vec![vec![1.0, 0.5], vec![0.5, 1.0]];
     let matrix = TensionMatrix::new(raw_data);
 
-    let signature = sign_manifold(&matrix);
+    let (tx, mut rx) = mpsc::channel(1);
+    
+    tokio::spawn(sign_manifold_async(matrix, tx));
 
-    if signature.is_valid() {
-        println!("LWE Compliance: VERIFIED");
-    } else {
-        std::process::exit(1);
+    if let Some(signature) = rx.recv().await {
+        if signature.is_valid {
+            println!("LWE Compliance: VERIFIED");
+        } else {
+            std::process::exit(1);
+        }
     }
 }
