@@ -18,7 +18,6 @@ pub fn execute_sovereign_collapse(config: QuantumBundleConfig, nodes: &[[f64; 2]
     
     config.execute_sovereign_collapse(&manifold)
 }
-
 pub fn init_sovereign_core() {
     start_heartbeat();
     calibrate_resonance_lattice();
