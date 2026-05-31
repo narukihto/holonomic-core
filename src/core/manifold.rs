@@ -1,5 +1,4 @@
-use crate::core::tension::TensionMatrix;
-
+#[derive(Clone)]
 pub struct QuantumBundleConfig {
     pub distance_matrix: Vec<Vec<f64>>,
     pub adiabatic_time: f64,
