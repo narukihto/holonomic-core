@@ -1,21 +1,26 @@
-// examples/lwe_compliance_test.rs
-use ark_penta_v_core::{core::tension::TensionMatrix, crypto::lwe::sign_manifold_async};
+use ark_penta_v_core::core::tension::TensionMatrix;
+use ark_penta_v_core::crypto::lwe::sign_manifold_async;
 use tokio::sync::mpsc;
 
-#[tokio::main]
-async fn main() {
-    let raw_data = vec![vec![1.0, 0.5], vec![0.5, 1.0]];
-    let matrix = TensionMatrix::new(raw_data);
+fn main() {
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
 
-    let (tx, mut rx) = mpsc::channel(1);
+    rt.block_on(async {
+        let raw_data = vec![vec![1.0, 0.5], vec![0.5, 1.0]];
+        let matrix = TensionMatrix::new(raw_data);
+        let (tx, mut rx) = mpsc::channel(1);
 
-    tokio::spawn(sign_manifold_async(matrix, tx));
+        tokio::spawn(sign_manifold_async(&matrix, tx));
 
-    if let Some(signature) = rx.recv().await {
-        if signature.is_valid {
-            println!("LWE Compliance: VERIFIED");
-        } else {
-            std::process::exit(1);
+        if let Some(signature) = rx.recv().await {
+            if signature.is_valid {
+                println!("LWE Compliance: VERIFIED");
+            } else {
+                std::process::exit(1);
+            }
         }
-    }
+    });
 }
