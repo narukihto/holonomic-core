@@ -28,11 +28,12 @@ pub struct SovereignManifold {
 }
 
 impl SovereignManifold {
-    pub fn new<const N: usize>(nodes: &[[f64; 2]; N]) -> Self {
+    pub fn new(nodes: &[[f64; 2]]) -> Self {
         Self {
             nodes: nodes.to_vec(),
         }
     }
+
     pub fn compute_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
         let mut matrix = vec![vec![0.0; n]; n];
@@ -46,6 +47,7 @@ impl SovereignManifold {
         }
         TensionMatrix::new(matrix)
     }
+
     fn euclidean_dist(&self, a: [f64; 2], b: [f64; 2]) -> f64 {
         ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
     }
