@@ -1,4 +1,4 @@
-use ark_penta_v_core::{execute_sovereign_collapse, QuantumBundleConfig, SovereignManifold};
+use ark_penta_v_core::{execute_sovereign_collapse, QuantumBundleConfig};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn bench_sovereign_collapse(c: &mut Criterion) {
@@ -9,7 +9,7 @@ fn bench_sovereign_collapse(c: &mut Criterion) {
     };
 
     c.bench_function("sovereign_collapse_5_nodes", |b| {
-        b.iter(|| execute_sovereign_collapse(black_box(&config), black_box(&nodes)))
+        b.iter(|| execute_sovereign_collapse(black_box(config.clone()), black_box(nodes.clone())))
     });
 }
 
