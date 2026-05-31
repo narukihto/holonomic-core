@@ -1,28 +1,26 @@
 use crate::core::tension::TensionMatrix;
+use tokio::sync::mpsc;
 
 pub struct SovereignSignature {
     pub hash: Vec<u8>,
     pub is_valid: bool,
 }
 
-impl SovereignSignature {
-    pub fn is_valid(&self) -> bool {
-        self.is_valid
-    }
-}
-
-pub fn sign_manifold(matrix: &TensionMatrix) -> SovereignSignature {
+pub async fn sign_manifold_async(
+    matrix: &TensionMatrix,
+    tx: mpsc::Sender<SovereignSignature>,
+) {
     let noise = generate_lattice_noise(matrix);
-    let is_tamper_free = verify_integrity(matrix, &noise);
+    let is_valid = verify_integrity(matrix, &noise);
 
-    if !is_tamper_free {
+    if !is_valid {
         trigger_geometric_lockdown();
     }
 
-    SovereignSignature {
+    let _ = tx.send(SovereignSignature {
         hash: vec![0u8; 32],
-        is_valid: is_tamper_free,
-    }
+        is_valid,
+    }).await;
 }
 
 fn generate_lattice_noise(matrix: &TensionMatrix) -> f64 {
@@ -36,10 +34,9 @@ fn generate_lattice_noise(matrix: &TensionMatrix) -> f64 {
 }
 
 fn verify_integrity(matrix: &TensionMatrix, noise: &f64) -> bool {
-    let current_noise = generate_lattice_noise(matrix);
-    (current_noise - noise).abs() < 1e-9
+    (generate_lattice_noise(matrix) - noise).abs() < 1e-9
 }
 
 fn trigger_geometric_lockdown() {
-    panic!("🚨 GEOMETRIC LOCKDOWN: Manifold integrity violation detected. System frozen.");
+    panic!("TERMINAL GEOMETRIC LOCKDOWN: Violation detected.");
 }
