@@ -10,16 +10,14 @@ pub use crate::evolution::collapse_to_optimum;
 pub use crate::observer::start_heartbeat;
 pub use crate::physics::calibrate_resonance_lattice;
 
-pub fn execute_sovereign_collapse<const N: usize>(nodes: &[[f64; 2]; N]) -> Vec<usize> {
+pub fn execute_sovereign_collapse(config: QuantumBundleConfig, nodes: &[[f64; 2]; 2]) -> f64 {
     let manifold = SovereignManifold::new(nodes);
-    let tension = manifold.compute_tension_matrix();
-    let signature = crypto::lwe::sign_manifold(&tension);
+    let mut tension = manifold.compute_tension_matrix();
+    
 
-    if !signature.is_valid() {
-        panic!("🚨 Geometric Lockdown: Tampering detected in the Sovereign Core!");
-    }
-
-    collapse_to_optimum(tension)
+    tension.enforce_terminal_boundary(config.adiabatic_time);
+    
+    config.execute_sovereign_collapse(&manifold)
 }
 
 pub fn init_sovereign_core() {
