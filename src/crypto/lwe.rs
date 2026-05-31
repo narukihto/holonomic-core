@@ -32,7 +32,6 @@ fn generate_lattice_noise(matrix: &TensionMatrix) -> f64 {
         .sum::<f64>()
         % 0.01
 }
-
 fn verify_integrity(matrix: &TensionMatrix, noise: &f64) -> bool {
     (generate_lattice_noise(matrix) - noise).abs() < 1e-9
 }
