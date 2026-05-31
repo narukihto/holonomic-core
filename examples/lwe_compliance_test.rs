@@ -1,5 +1,5 @@
-use ark_penta_v_core::core::tension::TensionMatrix;
-use ark_penta_v_core::crypto::lwe::sign_manifold_async;
+// examples/lwe_compliance_test.rs
+use ark_penta_v_core::{core::tension::TensionMatrix, crypto::lwe::sign_manifold_async};
 use tokio::sync::mpsc;
 
 #[tokio::main]
@@ -8,7 +8,7 @@ async fn main() {
     let matrix = TensionMatrix::new(raw_data);
 
     let (tx, mut rx) = mpsc::channel(1);
-    
+
     tokio::spawn(sign_manifold_async(matrix, tx));
 
     if let Some(signature) = rx.recv().await {
