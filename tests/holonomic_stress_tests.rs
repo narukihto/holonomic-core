@@ -19,7 +19,6 @@ fn test_sovereign_collapse_stress_load() {
 
         let result = execute_sovereign_collapse(config, nodes);
 
-        // التأكد من أن النتيجة تمثل تقارباً صالحاً للمتجه الطوبولوجي
         assert!(result >= 0.0);
     }
 }
