@@ -1,3 +1,5 @@
+use ark_penta_v_core::{execute_sovereign_collapse, QuantumBundleConfig};
+
 #[cfg(test)]
 mod tests {
     use super::*;
