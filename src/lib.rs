@@ -1,4 +1,3 @@
-// src/lib.rs
 pub mod core;
 pub mod crypto;
 pub mod evolution;
@@ -11,7 +10,7 @@ pub use crate::evolution::collapse_to_optimum;
 pub use crate::observer::start_heartbeat;
 pub use crate::physics::calibrate_resonance_lattice;
 
-pub fn execute_sovereign_collapse(config: QuantumBundleConfig, nodes: &[[f64; 2]; 2]) -> f64 {
+pub fn execute_sovereign_collapse(config: QuantumBundleConfig, nodes: &[[f64; 2]]) -> f64 {
     let manifold = SovereignManifold::new(nodes);
     let mut tension = manifold.compute_tension_matrix();
 
