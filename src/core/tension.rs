@@ -15,37 +15,15 @@ impl TensionMatrix {
                 data[i][j] = Float::with_val(128, val);
             }
         }
-        let mut t_matrix = Self { data, size };
-        t_matrix.apply_topological_resistance();
-        t_matrix.apply_convex_stabilization();
-        t_matrix
+        Self { data, size }
     }
 
-    fn apply_topological_resistance(&mut self) {
-        let sigma = Float::with_val(128, 1.0);
-        let two = Float::with_val(128, 2.0);
+    pub fn enforce_terminal_boundary(&mut self, t_max: f64) {
+        let decay_factor = Float::with_val(128, (-10.0f64).exp());
         for i in 0..self.size {
             for j in 0..self.size {
-                if i != j {
-                    let dist = &self.data[i][j];
-                    let dist_sq: Float = dist.clone().pow(2);
-                    let sigma_sq: Float = sigma.clone().pow(2);
-                    let denom = Float::with_val(128, &two * &sigma_sq);
-                    let mut exponent: Float = dist_sq;
-                    exponent /= &denom;
-                    exponent = -exponent;
-                    self.data[i][j] = exponent.exp();
-                } else {
-                    self.data[i][j] = Float::with_val(128, 0.0);
-                }
+                self.data[i][j] *= &decay_factor;
             }
-        }
-    }
-
-    pub fn apply_convex_stabilization(&mut self) {
-        let lambda = Float::with_val(128, 1e-15);
-        for i in 0..self.size {
-            self.data[i][i] += &lambda;
         }
     }
 }
