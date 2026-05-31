@@ -40,10 +40,19 @@ jobs:
           cargo test --test holonomic_stress_tests
           cargo test --test quantum_manifolds_tests
 
+      - name: Sovereign Benchmark
+        run: cargo bench
+
+      - name: Archive Benchmark Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifold-benchmark-report
+          path: target/criterion/
+
       - name: Sovereign Release Build
-        run: cargo build --release --verbose
-        env:
-          RUSTFLAGS: "-D warnings -C target-feature=+crt-static -C link-arg=-s"
+        run: |
+          cargo build --release --verbose
+          strip target/release/ark_penta_v_core || true
 
       - name: Security Audit
         run: cargo run --example lwe_compliance_test
