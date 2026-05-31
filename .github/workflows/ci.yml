@@ -27,25 +27,22 @@ jobs:
       - name: Cache Build Dependencies
         uses: swatinem/rust-cache@v2
 
-      - name: Audit Formal Syntax (Rustfmt)
+      - name: Audit Formal Syntax
         run: cargo fmt --all -- --check
 
-      - name: Zero-Tolerance Static Analysis (Clippy)
+      - name: Zero-Tolerance Static Analysis
         run: cargo clippy --all-targets --all-features -- -D warnings
 
       - name: Mathematical Integrity and Invariant Verification
         run: cargo test --verbose
 
-      - name: Sovereign Stress Test (High-Load Stability)
+      - name: Sovereign Stress Test
         run: |
-          # تشغيل كافة اختبارات الإجهاد والمانيفولد المتاحة ديناميكياً
           cargo test --test holonomic_stress_tests
           cargo test --test quantum_manifolds_tests
 
       - name: Sovereign Release Build
         run: cargo build --release --verbose
 
-      - name: Security Audit (LWE Compliance Check)
-        run: |
-          # التحقق من أن طبقة التشفير LWE سليمة ولم تتعرض للتهكير
-          cargo run --example lwe_compliance_test
+      - name: Security Audit
+        run: cargo run --example lwe_compliance_test
