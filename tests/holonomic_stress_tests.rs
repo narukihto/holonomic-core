@@ -5,7 +5,11 @@ use ark_penta_v_core::{
 use std::env;
 
 fn get_node_count() -> usize {
-    if env::var("CI").is_ok() { 10000 } else { 100000 }
+    if env::var("CI").is_ok() {
+        10000
+    } else {
+        100000
+    }
 }
 
 #[test]
@@ -26,7 +30,9 @@ fn test_sovereign_collapse_stress_load_100k() {
 
     assert!(result >= 0.0);
     // ضبط المهلة بناءً على حجم العينة
-    if n == 100000 { assert!(duration.as_secs() < 5); }
+    if n == 100000 {
+        assert!(duration.as_secs() < 5);
+    }
 }
 
 #[test]
@@ -44,5 +50,7 @@ fn test_jacobian_projection_scaling_100k() {
     let duration = start.elapsed();
 
     assert_eq!(optimized_path.len(), n);
-    if n == 100000 { assert!(duration.as_secs() < 10); }
+    if n == 100000 {
+        assert!(duration.as_secs() < 10);
+    }
 }
