@@ -1,4 +1,4 @@
-use ark_penta_v_core::{execute_sovereign_collapse, QuantumBundleConfig};
+use ark_penta_v_core::{execute_sovereign_collapse, QuantumBundleConfig, collapse_to_optimum, SovereignManifold};
 
 #[cfg(test)]
 mod tests {
@@ -46,5 +46,14 @@ mod tests {
         };
         let result = execute_sovereign_collapse(config, nodes);
         assert!(result > 0.0);
+    }
+
+    #[test]
+    fn test_jacobian_convergence_integrity() {
+        let nodes: &[[f64; 2]] = &[[0.0, 0.0], [1.0, 1.0], [2.0, 0.0]];
+        let manifold = SovereignManifold::new(nodes);
+        let tension = manifold.compute_tension_matrix();
+        let path = collapse_to_optimum(tension);
+        assert_eq!(path.len(), 3);
     }
 }
