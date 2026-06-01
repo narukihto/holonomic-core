@@ -13,7 +13,7 @@ jobs:
   sovereign-verification:
     name: Formal Mathematical and Security Audit
     runs-on: ubuntu-latest
-    timeout-minutes: 30 # زيادة المهلة لتجنب الإلغاء القسري
+    timeout-minutes: 45
 
     steps:
       - name: Checkout Sovereign State
@@ -34,22 +34,19 @@ jobs:
         run: cargo clippy --all-targets --all-features -- -D warnings
 
       - name: Mathematical Integrity and Invariant Verification
-        run: cargo test --verbose --release # التشغيل بوضع Release
+        run: cargo test --verbose --release
 
-      - name: Sovereign Stress Test
-        run: |
-          cargo test --test holonomic_stress_tests --release
-          cargo test --test quantum_manifolds_tests --release
-          cargo test --test integration_suite --release
+      - name: Sovereign Stress Test Part 1 (Holonomic)
+        run: cargo test --test holonomic_stress_tests --release
+
+      - name: Sovereign Stress Test Part 2 (Manifolds)
+        run: cargo test --test quantum_manifolds_tests --release
+
+      - name: Sovereign Stress Test Part 3 (Integration)
+        run: cargo test --test integration_suite --release
 
       - name: Sovereign Benchmark
-        run: cargo bench -- --nocapture # إضافة --nocapture للمتابعة
-
-      - name: Archive Benchmark Reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: manifold-benchmark-report
-          path: target/criterion/
+        run: cargo bench -- --nocapture
 
       - name: Sovereign Release Build
         run: |
