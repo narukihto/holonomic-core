@@ -1,5 +1,6 @@
 use rug::Float;
 
+#[derive(Clone, Debug)]
 pub struct TensionMatrix {
     pub data: Vec<Vec<Float>>,
     pub size: usize,
