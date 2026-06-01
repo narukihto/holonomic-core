@@ -1,5 +1,5 @@
-use crate::physics::calculate_jacobian_manifold_operator;
 use crate::core::tension::TensionMatrix;
+use crate::physics::calculate_jacobian_manifold_operator;
 use rug::Float;
 
 pub struct CollapseState {
