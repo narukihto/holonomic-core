@@ -1,6 +1,7 @@
 use ark_penta_v_core::{collapse_to_optimum, QuantumBundleConfig, SovereignManifold};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use std::env;
+use std::time::Duration;
 
 fn bench_sovereign_collapse(c: &mut Criterion) {
     let nodes: Vec<[f64; 2]> = vec![[0.0, 0.0], [1.0, 5.0], [2.0, 2.0], [5.0, 1.0], [10.0, 10.0]];
@@ -21,9 +22,10 @@ fn bench_sovereign_collapse(c: &mut Criterion) {
     let mut group = c.benchmark_group("jacobian");
     if env::var("CI").is_ok() {
         group.sample_size(10);
+        group.measurement_time(Duration::from_secs(60));
     }
 
-    group.bench_function("jacobian_collapse_1000_nodes", |b| {
+    group.bench_function("jacobian_collapse_10000_nodes", |b| {
         b.iter(|| collapse_to_optimum(black_box(tension.clone())))
     });
     group.finish();
