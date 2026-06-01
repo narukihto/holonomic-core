@@ -32,7 +32,7 @@ fn generate_lattice_noise(matrix: &TensionMatrix) -> Float {
         .fract()
 }
 
-fn verify_integrity(matrix: &TensionMatrix, noise: &Float) -> Float {
+fn verify_integrity(matrix: &TensionMatrix, noise: &Float) -> bool {
     let current_noise = generate_lattice_noise(matrix);
     (current_noise - noise).abs() < Float::with_val(128, 1e-9)
 }
