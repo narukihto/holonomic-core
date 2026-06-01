@@ -1,4 +1,5 @@
 use crate::core::tension::TensionMatrix;
+use rayon::prelude::*;
 
 #[derive(Clone)]
 pub struct QuantumBundleConfig {
@@ -37,16 +38,47 @@ impl SovereignManifold {
 
     pub fn compute_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
-        let mut matrix = vec![vec![0.0; n]; n];
-        for (i, node_i) in self.nodes.iter().enumerate() {
-            for (j, node_j) in self.nodes.iter().enumerate() {
-                if i != j {
-                    let dist = self.euclidean_dist(*node_i, *node_j);
-                    matrix[i][j] = 1.0 / dist;
+        let matrix: Vec<Vec<f64>> = (0..n)
+            .into_par_iter()
+            .map(|i| {
+                (0..n)
+                    .map(|j| {
+                        if i != j {
+                            let dist = self.euclidean_dist(self.nodes[i], self.nodes[j]);
+                            1.0 / dist
+                        } else {
+                            0.0
+                        }
+                    })
+                    .collect()
+            })
+            .collect();
+        TensionMatrix::new(matrix)
+    }
+
+    pub fn compute_gradient_collapse(&self, nodes: &[[f64; 2]]) -> Vec<[f64; 2]> {
+        nodes
+            .par_iter()
+            .map(|&node| self.apply_local_manifold_pressure(node))
+            .collect()
+    }
+
+    fn apply_local_manifold_pressure(&self, node: [f64; 2]) -> [f64; 2] {
+        let mut force = [0.0, 0.0];
+        for &other in &self.nodes {
+            if node != other {
+                let dx = other[0] - node[0];
+                let dy = other[1] - node[1];
+                let dist_sq = dx * dx + dy * dy;
+                let dist = dist_sq.sqrt();
+                if dist > 0.0 {
+                    let f = 1.0 / dist_sq;
+                    force[0] += f * dx / dist;
+                    force[1] += f * dy / dist;
                 }
             }
         }
-        TensionMatrix::new(matrix)
+        force
     }
 
     fn euclidean_dist(&self, a: [f64; 2], b: [f64; 2]) -> f64 {
