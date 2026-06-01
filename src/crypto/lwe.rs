@@ -1,6 +1,6 @@
 use crate::core::tension::TensionMatrix;
-use tokio::sync::mpsc;
 use rug::Float;
+use tokio::sync::mpsc;
 
 pub struct SovereignSignature {
     pub hash: Vec<u8>,
@@ -32,7 +32,7 @@ fn generate_lattice_noise(matrix: &TensionMatrix) -> Float {
         .fract()
 }
 
-fn verify_integrity(matrix: &TensionMatrix, noise: &Float) -> bool {
+fn verify_integrity(matrix: &TensionMatrix, noise: &Float) -> Float {
     let current_noise = generate_lattice_noise(matrix);
     (current_noise - noise).abs() < Float::with_val(128, 1e-9)
 }
