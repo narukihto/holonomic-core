@@ -1,4 +1,6 @@
-use ark_penta_v_core::{execute_sovereign_collapse, collapse_to_optimum, SovereignManifold, QuantumBundleConfig};
+use ark_penta_v_core::{
+    collapse_to_optimum, execute_sovereign_collapse, QuantumBundleConfig, SovereignManifold,
+};
 
 #[cfg(test)]
 mod integration_suite {
@@ -14,7 +16,7 @@ mod integration_suite {
 
         let manifold = SovereignManifold::new(nodes);
         let tension = manifold.compute_tension_matrix();
-        
+
         let path = collapse_to_optimum(tension);
         let result = execute_sovereign_collapse(config, nodes);
 
@@ -27,7 +29,7 @@ mod integration_suite {
         let nodes: &[[f64; 2]] = &[[0.0, 0.0], [100.0, 100.0]];
         let manifold = SovereignManifold::new(nodes);
         let tension = manifold.compute_tension_matrix();
-        
+
         let path = collapse_to_optimum(tension);
         assert_eq!(path.len(), 2);
     }
