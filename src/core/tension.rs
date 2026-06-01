@@ -1,4 +1,3 @@
-// src/core/tension.rs
 use rug::Float;
 
 pub struct TensionMatrix {
@@ -25,5 +24,9 @@ impl TensionMatrix {
                 self.data[i][j] *= &decay_factor;
             }
         }
+    }
+
+    pub fn apply_asymmetric_bias(&mut self, i: usize, j: usize, bias: f64) {
+        self.data[i][j] *= Float::with_val(128, bias);
     }
 }
