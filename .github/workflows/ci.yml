@@ -2,9 +2,9 @@ name: ARK-Penta-V Sovereign Integrity Pipeline
 
 on:
   push:
-    branches: [ ark ]
+    branches: [ tension ]
   pull_request:
-    branches: [ ark ]
+    branches: [ tension ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -39,6 +39,7 @@ jobs:
         run: |
           cargo test --test holonomic_stress_tests
           cargo test --test quantum_manifolds_tests
+          cargo test --test integration_suite
 
       - name: Sovereign Benchmark
         run: cargo bench
