@@ -7,9 +7,7 @@ use ark_penta_v_core::{
 fn test_sovereign_collapse_stress_load_100k() {
     init_sovereign_core();
 
-    let large_nodes: Vec<[f64; 2]> = (0..100000)
-        .map(|i| [i as f64, (i % 250) as f64])
-        .collect();
+    let large_nodes: Vec<[f64; 2]> = (0..100000).map(|i| [i as f64, (i % 250) as f64]).collect();
 
     let config = QuantumBundleConfig {
         distance_matrix: vec![],
@@ -28,9 +26,7 @@ fn test_sovereign_collapse_stress_load_100k() {
 fn test_jacobian_projection_scaling_100k() {
     init_sovereign_core();
 
-    let large_nodes: Vec<[f64; 2]> = (0..100000)
-        .map(|i| [i as f64, (i % 500) as f64])
-        .collect();
+    let large_nodes: Vec<[f64; 2]> = (0..100000).map(|i| [i as f64, (i % 500) as f64]).collect();
 
     let manifold = SovereignManifold::new(&large_nodes);
     let tension = manifold.compute_tension_matrix();
