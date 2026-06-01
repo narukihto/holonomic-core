@@ -1,4 +1,6 @@
-use ark_penta_v_core::{execute_sovereign_collapse, QuantumBundleConfig, collapse_to_optimum, SovereignManifold};
+use ark_penta_v_core::{
+    collapse_to_optimum, execute_sovereign_collapse, QuantumBundleConfig, SovereignManifold,
+};
 
 #[cfg(test)]
 mod tests {
