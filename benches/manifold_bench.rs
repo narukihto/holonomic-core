@@ -14,7 +14,7 @@ fn bench_sovereign_collapse(c: &mut Criterion) {
         b.iter(|| config.execute_sovereign_collapse(black_box(&manifold)))
     });
 
-    let large_nodes: Vec<[f64; 2]> = (0..1000).map(|i| [i as f64, (i % 100) as f64]).collect();
+    let large_nodes: Vec<[f64; 2]> = (0..10000).map(|i| [i as f64, (i % 100) as f64]).collect();
     let large_manifold = SovereignManifold::new(&large_nodes);
     let tension = large_manifold.compute_tension_matrix();
 
