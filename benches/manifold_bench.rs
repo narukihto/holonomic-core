@@ -1,5 +1,6 @@
 use ark_penta_v_core::{collapse_to_optimum, QuantumBundleConfig, SovereignManifold};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use std::env;
 
 fn bench_sovereign_collapse(c: &mut Criterion) {
     let nodes: Vec<[f64; 2]> = vec![[0.0, 0.0], [1.0, 5.0], [2.0, 2.0], [5.0, 1.0], [10.0, 10.0]];
@@ -17,9 +18,15 @@ fn bench_sovereign_collapse(c: &mut Criterion) {
     let large_manifold = SovereignManifold::new(&large_nodes);
     let tension = large_manifold.compute_tension_matrix();
 
-    c.bench_function("jacobian_collapse_1000_nodes", |b| {
+    let mut group = c.benchmark_group("jacobian");
+    if env::var("CI").is_ok() {
+        group.sample_size(10);
+    }
+
+    group.bench_function("jacobian_collapse_1000_nodes", |b| {
         b.iter(|| collapse_to_optimum(black_box(tension.clone())))
     });
+    group.finish();
 }
 
 criterion_group!(benches, bench_sovereign_collapse);
