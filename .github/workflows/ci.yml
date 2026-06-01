@@ -34,7 +34,7 @@ jobs:
         run: cargo clippy --all-targets --all-features -- -D warnings
 
       - name: Mathematical Integrity and Invariant Verification
-        run: cargo test --verbose --release
+        run: cargo test --verbose --release --lib
 
       - name: Sovereign Stress Test Part 1 (Holonomic)
         run: cargo test --test holonomic_stress_tests --release
