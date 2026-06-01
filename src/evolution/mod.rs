@@ -1,5 +1,5 @@
-use crate::core::tension::TensionMatrix;
 use crate::core::physics::calculate_jacobian_manifold_operator;
+use crate::core::tension::TensionMatrix;
 use rug::Float;
 
 pub struct CollapseState {
@@ -9,7 +9,9 @@ pub struct CollapseState {
 
 pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     let n = tension.size;
-    if n < 2 { return (0..n).collect(); }
+    if n < 2 {
+        return (0..n).collect();
+    }
 
     let mut current_path: Vec<usize> = (0..n).collect();
     let max_epochs = 200;
@@ -20,7 +22,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
         for i in 0..n {
             let next = (i + 1) % n;
-            
+
             let mut internal_pressure = Float::with_val(128, 0.0);
             for j in 0..n {
                 internal_pressure += &jacobian_matrix[current_path[i]][current_path[j]];
