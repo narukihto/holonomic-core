@@ -6,7 +6,7 @@ use std::env;
 
 fn get_node_count() -> usize {
     if env::var("CI").is_ok() {
-        1000
+        10000
     } else {
         100000
     }
