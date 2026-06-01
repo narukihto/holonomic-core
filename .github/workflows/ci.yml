@@ -48,6 +48,12 @@ jobs:
       - name: Sovereign Benchmark
         run: cargo bench -- --nocapture
 
+      - name: Upload Benchmark Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: target/criterion/
+
       - name: Sovereign Release Build
         run: |
           cargo build --release --verbose
