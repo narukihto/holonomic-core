@@ -1,4 +1,4 @@
-use ark_penta_v_core::{QuantumBundleConfig, SovereignManifold, collapse_to_optimum};
+use ark_penta_v_core::{collapse_to_optimum, QuantumBundleConfig, SovereignManifold};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn bench_sovereign_collapse(c: &mut Criterion) {
