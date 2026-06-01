@@ -1,56 +1,46 @@
 use crate::core::tension::TensionMatrix;
+use crate::core::physics::calculate_jacobian_manifold_operator;
 use rug::Float;
 
 pub struct CollapseState {
     pub path: Vec<usize>,
-    pub gradient: Vec<Float>,
     pub iteration: u64,
 }
 
 pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
-    let mut state = CollapseState {
-        path: (0..tension.size).collect(),
-        gradient: vec![Float::with_val(128, 0.0); tension.size],
-        iteration: 0,
-    };
+    let n = tension.size;
+    if n < 2 { return (0..n).collect(); }
 
-    while state.iteration < 1000 {
-        state.gradient = calculate_gradient(&state.path, &tension);
+    let mut current_path: Vec<usize> = (0..n).collect();
+    let max_epochs = 200;
 
-        if is_zero_or_negligible(&state.gradient) {
-            break;
+    for _epoch in 0..max_epochs {
+        let jacobian_matrix = calculate_jacobian_manifold_operator(&current_path, &tension);
+        let mut converged = true;
+
+        for i in 0..n {
+            let next = (i + 1) % n;
+            
+            let mut internal_pressure = Float::with_val(128, 0.0);
+            for j in 0..n {
+                internal_pressure += &jacobian_matrix[current_path[i]][current_path[j]];
+            }
+
+            let mut external_pressure = Float::with_val(128, 0.0);
+            for j in 0..n {
+                external_pressure += &jacobian_matrix[current_path[next]][current_path[j]];
+            }
+
+            if internal_pressure > external_pressure {
+                current_path.swap(i, next);
+                converged = false;
+            }
         }
 
-        state.path = refine_geodesic(state.path, &state.gradient);
-        state.iteration += 1;
+        if converged {
+            break;
+        }
     }
 
-    state.path
-}
-
-fn calculate_gradient(path: &[usize], tension: &TensionMatrix) -> Vec<Float> {
-    path.iter()
-        .map(|&node| {
-            let mut force = Float::with_val(128, 0.0);
-            for j in 0..tension.size {
-                force += &tension.data[node][j];
-            }
-            force
-        })
-        .collect()
-}
-
-fn refine_geodesic(path: Vec<usize>, gradient: &[Float]) -> Vec<usize> {
-    let mut new_path = path;
-    new_path.sort_by(|&a, &b| {
-        gradient[a]
-            .partial_cmp(&gradient[b])
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
-    new_path
-}
-
-fn is_zero_or_negligible(gradient: &[Float]) -> bool {
-    let epsilon = Float::with_val(128, 1e-20);
-    gradient.iter().all(|g| g.clone().abs() < epsilon)
+    current_path
 }
