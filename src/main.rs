@@ -5,7 +5,6 @@ fn main() {
 
     println!("🏛️ ARK-Penta-V Core Initialized. Sovereign Mode: ACTIVE.");
 
-    // تحويل المصفوفة إلى شريحة ديناميكية لضمان مرونة الانهيار الطوبولوجي
     let nodes: &[[f64; 2]] = &[[0.0, 0.0], [1.0, 5.0], [5.0, 2.0], [3.0, 0.0]];
 
     let config = QuantumBundleConfig {
