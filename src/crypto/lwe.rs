@@ -1,6 +1,6 @@
-// src/crypto/lwe.rs
 use crate::core::tension::TensionMatrix;
 use tokio::sync::mpsc;
+use rug::Float;
 
 pub struct SovereignSignature {
     pub hash: Vec<u8>,
@@ -23,18 +23,18 @@ pub async fn sign_manifold_async(matrix: &TensionMatrix, tx: mpsc::Sender<Sovere
         .await;
 }
 
-fn generate_lattice_noise(matrix: &TensionMatrix) -> f64 {
+fn generate_lattice_noise(matrix: &TensionMatrix) -> Float {
     matrix
         .data
         .iter()
         .flatten()
-        .map(|f| f.to_f64())
-        .sum::<f64>()
-        % 0.01
+        .fold(Float::with_val(128, 0.0), |acc, x| acc + x)
+        .fract()
 }
 
-fn verify_integrity(matrix: &TensionMatrix, noise: &f64) -> bool {
-    (generate_lattice_noise(matrix) - noise).abs() < 1e-9
+fn verify_integrity(matrix: &TensionMatrix, noise: &Float) -> bool {
+    let current_noise = generate_lattice_noise(matrix);
+    (current_noise - noise).abs() < Float::with_val(128, 1e-9)
 }
 
 fn trigger_geometric_lockdown() {
