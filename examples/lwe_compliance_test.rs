@@ -1,5 +1,6 @@
 use ark_penta_v_core::core::tension::TensionMatrix;
 use ark_penta_v_core::crypto::lwe::sign_manifold_async;
+use ark_penta_v_core::evolution::collapse_to_optimum;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 
@@ -21,6 +22,7 @@ fn main() {
 
         if let Some(signature) = rx.recv().await {
             if signature.is_valid {
+                let _optimized_path = collapse_to_optimum((*matrix).clone());
                 println!("LWE Compliance: VERIFIED");
             } else {
                 std::process::exit(1);
