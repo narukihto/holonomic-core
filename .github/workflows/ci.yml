@@ -2,9 +2,9 @@ name: ARK-Penta-V Sovereign Integrity Pipeline
 
 on:
   push:
-    branches: [ tension ]
+    branches: [ Tension ]
   pull_request:
-    branches: [ tension ]
+    branches: [ Tension ]
 
 env:
   CARGO_TERM_COLOR: always
