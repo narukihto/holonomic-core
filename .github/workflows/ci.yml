@@ -1,25 +1,36 @@
 name: ARK-Penta-V Sovereign Integrity Pipeline
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ Tension ]
+  pull_request:
+    branches: [ Tension ]
+
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
-  # 1. التدقيق العام (سريع جداً)
   audit:
+    name: Audit, Integration & Math
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: swatinem/rust-cache@v2
       - run: cargo fmt --all -- --check
       - run: cargo clippy --all-targets --all-features -- -D warnings
+      - run: cargo test --verbose --release --test integration_suite --test quantum_manifolds_tests --lib
 
-  # 2. الاختبارات (موزعة لضمان عدم التعليق)
   test-chaos:
     needs: audit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo test --test holonomic_stress_tests test_ultimate_random_chaos_100k --release -- --test-threads=1
+      - uses: swatinem/rust-cache@v2
+      - run: cargo test --test holonomic_stress_tests test_ultimate_random_chaos_100k --release -- --test-threads=1 --nocapture
 
   test-fractal:
     needs: audit
@@ -27,7 +38,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo test --test holonomic_stress_tests test_clustered_fractal_trap_100k --release -- --test-threads=1
+      - uses: swatinem/rust-cache@v2
+      - run: cargo test --test holonomic_stress_tests test_clustered_fractal_trap_100k --release -- --test-threads=1 --nocapture
 
   test-ring:
     needs: audit
@@ -35,7 +47,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo test --test holonomic_stress_tests test_monolithic_ring_symmetry_100k --release -- --test-threads=1
+      - uses: swatinem/rust-cache@v2
+      - run: cargo test --test holonomic_stress_tests test_monolithic_ring_symmetry_100k --release -- --test-threads=1 --nocapture
 
   test-germany:
     needs: audit
@@ -43,4 +56,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo test --test holonomic_stress_tests test_historic_germany_d15112_exact_match --release -- --test-threads=1
+      - uses: swatinem/rust-cache@v2
+      - run: cargo test --test holonomic_stress_tests test_historic_germany_d15112_exact_match --release -- --test-threads=1 --nocapture
+
+  sovereign-finalization:
+    name: Build & Security Audit
+    runs-on: ubuntu-latest
+    needs: [test-chaos, test-fractal, test-ring, test-germany]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+      - name: Sovereign Benchmark
+        run: cargo bench -- --nocapture
+      - name: Upload Benchmark Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: target/criterion/
+      - name: Sovereign Release Build
+        run: |
+          cargo build --release --verbose
+          strip target/release/ark_penta_v_core || true
+      - name: Security Audit
+        run: cargo run --example lwe_compliance_test --release
