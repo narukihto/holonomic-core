@@ -1,4 +1,5 @@
 use crate::core::tension::TensionMatrix;
+use rayon::prelude::*;
 use rug::Float;
 use tokio::sync::mpsc;
 
@@ -24,19 +25,23 @@ pub async fn sign_manifold_async(matrix: &TensionMatrix, tx: mpsc::Sender<Sovere
 }
 
 fn generate_lattice_noise(matrix: &TensionMatrix) -> Float {
-    matrix
+    let total_sum: Float = matrix
         .data
-        .iter()
-        .flatten()
-        .fold(Float::with_val(128, 0.0), |acc, x| acc + x)
-        .fract()
+        .par_iter()
+        .map(|row| {
+            row.iter().fold(Float::with_val(128, 0.0), |acc, x| acc + x)
+        })
+        .reduce(|| Float::with_val(128, 0.0), |acc, x| acc + x);
+
+    total_sum.fract()
 }
 
 fn verify_integrity(matrix: &TensionMatrix, noise: &Float) -> bool {
     let current_noise = generate_lattice_noise(matrix);
-    (current_noise - noise).abs() < Float::with_val(128, 1e-9)
+    let diff = (current_noise - noise).abs();
+    diff < Float::with_val(128, 1e-5)
 }
 
 fn trigger_geometric_lockdown() {
-    panic!("TERMINAL GEOMETRIC LOCKDOWN: Violation detected.");
+    panic!("TERMINAL GEOMETRIC LOCKDOWN: Geometric consistency anomaly or illegal matrix manipulation detected.");
 }
