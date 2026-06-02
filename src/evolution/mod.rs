@@ -1,6 +1,7 @@
 use crate::core::tension::TensionMatrix;
 use crate::physics::calculate_jacobian_manifold_operator;
 use rug::Float;
+use std::collections::HashSet;
 
 pub struct CollapseState {
     pub path: Vec<usize>,
@@ -14,9 +15,12 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     }
 
     let mut current_path: Vec<usize> = (0..n).collect();
-    let max_epochs = 200;
+    let max_epochs = 500; 
+    let mut quantum_temperature = 500.0f64;
+    let cooling_rate = 0.92;
+    let k_neighbors = if n > 50 { 50 } else { n };
 
-    for _epoch in 0..max_epochs {
+    for epoch in 0..max_epochs {
         let jacobian_matrix = calculate_jacobian_manifold_operator(&current_path, &tension);
         let mut converged = true;
 
@@ -24,25 +28,49 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
             let next = (i + 1) % n;
 
             let mut internal_pressure = Float::with_val(128, 0.0);
-            for j in 0..n {
+            let start_j = if i > k_neighbors / 2 { i - k_neighbors / 2 } else { 0 };
+            let end_j = std::cmp::min(start_j + k_neighbors, n);
+            
+            for j in start_j..end_j {
                 internal_pressure += &jacobian_matrix[current_path[i]][current_path[j]];
             }
 
             let mut external_pressure = Float::with_val(128, 0.0);
-            for j in 0..n {
+            for j in start_j..end_j {
                 external_pressure += &jacobian_matrix[current_path[next]][current_path[j]];
             }
 
-            if internal_pressure > external_pressure {
+            let delta = internal_pressure.clone() - &external_pressure;
+            let should_swap = if delta > 0.0 {
+                true
+            } else {
+                quantum_temperature > 0.01 && 
+                (rand::random::<f64>() < (-(quantum_temperature) / 20.0).exp())
+            };
+
+            if should_swap {
                 current_path.swap(i, next);
                 converged = false;
             }
+
+            if epoch > 40 && i % 12 == 0 {
+                let target_jump = (i + rand::random::<usize>()) % n;
+                if target_jump != i && target_jump != next {
+                    current_path.swap(i, target_jump);
+                    converged = false;
+                }
+            }
         }
 
-        if converged {
+        quantum_temperature *= cooling_rate;
+
+        if converged && epoch > 80 {
             break;
         }
     }
+
+    let unique_nodes: HashSet<&usize> = current_path.iter().collect();
+    assert_eq!(unique_nodes.len(), n);
 
     current_path
 }
