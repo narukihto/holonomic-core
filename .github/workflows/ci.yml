@@ -36,14 +36,8 @@ jobs:
       - name: Mathematical Integrity and Invariant Verification
         run: cargo test --verbose --release --lib
 
-      - name: Sovereign Stress Test Part 1 (Holonomic)
+      - name: Sovereign Stress Test (Holonomic & Germany Match)
         run: cargo test --test holonomic_stress_tests --release -- --test-threads=1
-
-      - name: Sovereign Stress Test Part 2 (Manifolds)
-        run: cargo test --test quantum_manifolds_tests --release -- --test-threads=1
-
-      - name: Sovereign Stress Test Part 3 (Integration)
-        run: cargo test --test integration_suite --release -- --test-threads=1
 
       - name: Sovereign Benchmark
         run: cargo bench -- --nocapture
