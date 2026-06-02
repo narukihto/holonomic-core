@@ -36,9 +36,16 @@ impl SovereignManifold {
         }
     }
 
+    pub fn size(&self) -> usize {
+        self.nodes.len()
+    }
+
     pub fn compute_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
-        let k_neighbors = if n > 50 { 50 } else { n };
+        if n == 0 {
+            return TensionMatrix::new(vec![]);
+        }
+        let k_neighbors = if n > 50 { 50 } else { n.saturating_sub(1) };
 
         let matrix: Vec<Vec<f64>> = (0..n)
             .into_par_iter()
@@ -53,11 +60,14 @@ impl SovereignManifold {
                     })
                     .collect();
 
-                dists.select_nth_unstable_by(k_neighbors, |a, b| a.1.partial_cmp(&b.1).unwrap());
+                if k_neighbors > 0 && k_neighbors < n {
+                    dists.select_nth_unstable_by(k_neighbors, |a, b| a.1.partial_cmp(&b.1).unwrap());
+                }
 
                 let mut row = vec![0.0; n];
-                for &(j, dist) in dists.iter().take(k_neighbors) {
-                    if dist > 0.0 && i != j {
+                let take_n = if k_neighbors == 0 { 0 } else { k_neighbors };
+                for &(j, dist) in dists.iter().take(take_n) {
+                    if dist > 0.0 && dist != f64::MAX && i != j {
                         row[j] = 1.0 / dist;
                     }
                 }
@@ -78,7 +88,10 @@ impl SovereignManifold {
     fn apply_local_manifold_pressure(&self, node: [f64; 2]) -> [f64; 2] {
         let mut force = [0.0, 0.0];
         let n = self.nodes.len();
-        let k_neighbors = if n > 50 { 50 } else { n };
+        if n < 2 {
+            return force;
+        }
+        let k_neighbors = if n > 50 { 50 } else { n.saturating_sub(1) };
 
         let mut local_nodes: Vec<(usize, f64)> = self
             .nodes
@@ -92,7 +105,7 @@ impl SovereignManifold {
             })
             .collect();
 
-        if local_nodes.len() > k_neighbors {
+        if k_neighbors > 0 && k_neighbors < n {
             local_nodes.select_nth_unstable_by(k_neighbors, |a, b| a.1.partial_cmp(&b.1).unwrap());
         }
 
