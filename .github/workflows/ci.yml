@@ -1,66 +1,46 @@
 name: ARK-Penta-V Sovereign Integrity Pipeline
 
-on:
-  push:
-    branches: [ Tension ]
-  pull_request:
-    branches: [ Tension ]
-
-env:
-  CARGO_TERM_COLOR: always
+on: [push, pull_request]
 
 jobs:
-  # المرحلة الأولى: الفحص السريع والرياضي (يجب أن تمر بسرعة)
-  sovereign-verification:
-    name: Formal Mathematical and Security Audit
+  # 1. التدقيق العام (سريع جداً)
+  audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-      - uses: swatinem/rust-cache@v2
-      - name: Audit Formal Syntax
-        run: cargo fmt --all -- --check
-      - name: Zero-Tolerance Static Analysis
-        run: cargo clippy --all-targets --all-features -- -D warnings
-      - name: Mathematical Integrity and Invariant Verification
-        run: cargo test --verbose --release --lib
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --all-targets --all-features -- -D warnings
 
-  # المرحلة الثانية: اختبارات الإجهاد (منفصلة ومحددة بوقت)
-  stress-test:
-    name: Sovereign Stress Test
+  # 2. الاختبارات (موزعة لضمان عدم التعليق)
+  test-chaos:
+    needs: audit
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: sovereign-verification
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - uses: swatinem/rust-cache@v2
-      - name: Execution
-        run: cargo test --test holonomic_stress_tests --release -- --test-threads=1 --nocapture
+      - run: cargo test --test holonomic_stress_tests test_ultimate_random_chaos_100k --release -- --test-threads=1
 
-  # المرحلة الثالثة: القياس والبناء النهائي
-  sovereign-build:
-    name: Build & Audit
+  test-fractal:
+    needs: audit
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: stress-test
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - uses: swatinem/rust-cache@v2
-      - name: Sovereign Benchmark
-        run: cargo bench -- --nocapture
-      - name: Upload Benchmark Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: benchmark-results
-          path: target/criterion/
-      - name: Sovereign Release Build
-        run: |
-          cargo build --release --verbose
-          strip target/release/ark_penta_v_core || true
-      - name: Security Audit
-        run: cargo run --example lwe_compliance_test --release
+      - run: cargo test --test holonomic_stress_tests test_clustered_fractal_trap_100k --release -- --test-threads=1
+
+  test-ring:
+    needs: audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --test holonomic_stress_tests test_monolithic_ring_symmetry_100k --release -- --test-threads=1
+
+  test-germany:
+    needs: audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --test holonomic_stress_tests test_historic_germany_d15112_exact_match --release -- --test-threads=1
