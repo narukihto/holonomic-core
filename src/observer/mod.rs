@@ -1,5 +1,4 @@
 use crate::core::tension::TensionMatrix;
-use num_integer::Integer;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 pub struct SovereignObserver {
@@ -22,7 +21,7 @@ impl SovereignObserver {
     }
 
     pub fn observe_collapse_integrity(&self, _tension: &TensionMatrix, current_epoch: u64) {
-        if current_epoch.is_multiple_of(&50) {
+        if current_epoch % 50 == 0 {
             let elapsed = self.start_time.elapsed().as_secs_f64();
             if elapsed > 15.0 {
                 eprintln!(
