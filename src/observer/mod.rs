@@ -18,13 +18,19 @@ impl SovereignObserver {
         if current_epoch % 50 == 0 {
             let elapsed = self.start_time.elapsed().as_secs_f64();
             if elapsed > 15.0 {
-                eprintln!("⚠️ Warning: Manifold collapse under heavy stress at epoch {}", current_epoch);
+                eprintln!(
+                    "⚠️ Warning: Manifold collapse under heavy stress at epoch {}",
+                    current_epoch
+                );
             }
         }
     }
 
     pub fn log_completion(&self, final_distance: u64) {
-        println!("✅ Sovereign collapse completed. Final optimal distance: {}", final_distance);
+        println!(
+            "✅ Sovereign collapse completed. Final optimal distance: {}",
+            final_distance
+        );
     }
 }
 
