@@ -19,7 +19,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     let max_epochs = if env::var("CI").is_ok() { 50 } else { 500 };
     let mut quantum_temperature = 500.0f64;
     let cooling_rate = 0.92;
-    let k_neighbors = if n > 50 { 50 } else { n };
+    let k_neighbors = if n > 5 { 5 } else { n.saturating_sub(1) };
 
     for epoch in 0..max_epochs {
         let jacobian_matrix = calculate_jacobian_manifold_operator(&current_path, &tension);
@@ -30,18 +30,22 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
             let mut internal_pressure = Float::with_val(128, 0.0);
             let start_j = i.saturating_sub(k_neighbors / 2);
-            let end_j = std::cmp::min(start_j + k_neighbors, n);
+            let end_j = std::cmp::min(start_j + k_neighbors + 1, n);
 
             for j in start_j..end_j {
-                internal_pressure += &jacobian_matrix[current_path[i]][current_path[j]];
+                if j < n {
+                    internal_pressure += &jacobian_matrix[current_path[i]][current_path[j]];
+                }
             }
 
             let mut external_pressure = Float::with_val(128, 0.0);
             for j in start_j..end_j {
-                external_pressure += &jacobian_matrix[current_path[next]][current_path[j]];
+                if j < n {
+                    external_pressure += &jacobian_matrix[current_path[next]][current_path[j]];
+                }
             }
 
-            let delta = internal_pressure.clone() - &external_pressure;
+            let delta = internal_pressure - external_pressure;
             let should_swap = if delta > 0.0 {
                 true
             } else {
@@ -55,7 +59,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
             }
 
             if epoch > 40 && i % 12 == 0 {
-                let target_jump = (i + rand::random::<usize>()) % n;
+                let target_jump = rand::random::<usize>() % n;
                 if target_jump != i && target_jump != next {
                     current_path.swap(i, target_jump);
                     converged = false;
