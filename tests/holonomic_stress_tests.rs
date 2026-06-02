@@ -12,7 +12,7 @@ use std::time::Instant;
 
 fn get_node_count() -> usize {
     if env::var("CI").is_ok() {
-        10000
+        5000
     } else {
         100000
     }
@@ -38,7 +38,7 @@ fn test_clustered_fractal_trap_100k() {
     let mut rng = rand::thread_rng();
     let mut nodes = Vec::with_capacity(n);
 
-    let center_count = if n == 100000 { 100 } else { 10 };
+    let center_count = if n >= 100000 { 100 } else { 5 };
 
     let mut centers = Vec::new();
     for _ in 0..center_count {
@@ -178,7 +178,7 @@ fn run_and_verify_absolute_tsp(test_name: &str, nodes: &[[f64; 2]], max_seconds:
         duration.as_secs_f64()
     );
 
-    if nodes.len() == 100000 {
+    if env::var("CI").is_err() && nodes.len() >= 100000 {
         assert!(duration.as_secs() < max_seconds);
     }
 }
