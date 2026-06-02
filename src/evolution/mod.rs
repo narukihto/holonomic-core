@@ -33,14 +33,14 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
             let end_j = std::cmp::min(start_j + k_neighbors + 1, n);
 
             for j in start_j..end_j {
-                if j < n {
+                if j < n && i < n {
                     internal_pressure += &jacobian_matrix[current_path[i]][current_path[j]];
                 }
             }
 
             let mut external_pressure = Float::with_val(128, 0.0);
             for j in start_j..end_j {
-                if j < n {
+                if j < n && next < n {
                     external_pressure += &jacobian_matrix[current_path[next]][current_path[j]];
                 }
             }
@@ -53,7 +53,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                     && (rand::random::<f64>() < (-(quantum_temperature) / 20.0).exp())
             };
 
-            if should_swap {
+            if should_swap && i != next {
                 current_path.swap(i, next);
                 converged = false;
             }
@@ -69,13 +69,13 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
         quantum_temperature *= cooling_rate;
 
-        if converged && epoch > 80 {
+        if converged && epoch > 20 {
             break;
         }
     }
 
-    let unique_nodes: HashSet<&usize> = current_path.iter().collect();
-    assert_eq!(unique_nodes.len(), n);
+    let unique_nodes: HashSet<usize> = current_path.iter().cloned().collect();
+    assert_eq!(unique_nodes.len(), n, "Logic error: path contains duplicate nodes");
 
     current_path
 }
