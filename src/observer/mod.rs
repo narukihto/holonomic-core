@@ -20,6 +20,7 @@ impl SovereignObserver {
         }
     }
 
+    #[allow(clippy::manual_is_multiple_of)]
     pub fn observe_collapse_integrity(&self, _tension: &TensionMatrix, current_epoch: u64) {
         if current_epoch % 50 == 0 {
             let elapsed = self.start_time.elapsed().as_secs_f64();
