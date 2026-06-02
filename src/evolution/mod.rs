@@ -15,7 +15,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     }
 
     let mut current_path: Vec<usize> = (0..n).collect();
-    let max_epochs = 500; 
+    let max_epochs = 500;
     let mut quantum_temperature = 500.0f64;
     let cooling_rate = 0.92;
     let k_neighbors = if n > 50 { 50 } else { n };
@@ -28,9 +28,13 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
             let next = (i + 1) % n;
 
             let mut internal_pressure = Float::with_val(128, 0.0);
-            let start_j = if i > k_neighbors / 2 { i - k_neighbors / 2 } else { 0 };
+            let start_j = if i > k_neighbors / 2 {
+                i - k_neighbors / 2
+            } else {
+                0
+            };
             let end_j = std::cmp::min(start_j + k_neighbors, n);
-            
+
             for j in start_j..end_j {
                 internal_pressure += &jacobian_matrix[current_path[i]][current_path[j]];
             }
@@ -44,8 +48,8 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
             let should_swap = if delta > 0.0 {
                 true
             } else {
-                quantum_temperature > 0.01 && 
-                (rand::random::<f64>() < (-(quantum_temperature) / 20.0).exp())
+                quantum_temperature > 0.01
+                    && (rand::random::<f64>() < (-(quantum_temperature) / 20.0).exp())
             };
 
             if should_swap {
