@@ -1,47 +1,76 @@
 use crate::core::tension::TensionMatrix;
-use rayon::prelude::*;
+use crate::physics::calculate_jacobian_manifold_operator;
 use rug::Float;
-use tokio::sync::mpsc;
+use std::collections::HashSet;
 
-pub struct SovereignSignature {
-    pub hash: Vec<u8>,
-    pub is_valid: bool,
+pub struct CollapseState {
+    pub path: Vec<usize>,
+    pub iteration: u64,
 }
 
-pub async fn sign_manifold_async(matrix: &TensionMatrix, tx: mpsc::Sender<SovereignSignature>) {
-    let noise = generate_lattice_noise(matrix);
-    let is_valid = verify_integrity(matrix, &noise);
-
-    if !is_valid {
-        trigger_geometric_lockdown();
+pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
+    let n = tension.size;
+    if n < 2 {
+        return (0..n).collect();
     }
 
-    let _ = tx
-        .send(SovereignSignature {
-            hash: vec![0u8; 32],
-            is_valid,
-        })
-        .await;
-}
+    let mut current_path: Vec<usize> = (0..n).collect();
+    let max_epochs = 500; 
+    let mut quantum_temperature = 500.0f64;
+    let cooling_rate = 0.92;
+    let k_neighbors = if n > 50 { 50 } else { n };
 
-fn generate_lattice_noise(matrix: &TensionMatrix) -> Float {
-    let total_sum: Float = matrix
-        .data
-        .par_iter()
-        .map(|row| {
-            row.iter().fold(Float::with_val(128, 0.0), |acc, x| acc + x)
-        })
-        .reduce(|| Float::with_val(128, 0.0), |acc, x| acc + x);
+    for epoch in 0..max_epochs {
+        let jacobian_matrix = calculate_jacobian_manifold_operator(&current_path, &tension);
+        let mut converged = true;
 
-    total_sum.fract()
-}
+        for i in 0..n {
+            let next = (i + 1) % n;
 
-fn verify_integrity(matrix: &TensionMatrix, noise: &Float) -> bool {
-    let current_noise = generate_lattice_noise(matrix);
-    let diff = (current_noise - noise).abs();
-    diff < Float::with_val(128, 1e-5)
-}
+            let mut internal_pressure = Float::with_val(128, 0.0);
+            let start_j = if i > k_neighbors / 2 { i - k_neighbors / 2 } else { 0 };
+            let end_j = std::cmp::min(start_j + k_neighbors, n);
+            
+            for j in start_j..end_j {
+                internal_pressure += &jacobian_matrix[current_path[i]][current_path[j]];
+            }
 
-fn trigger_geometric_lockdown() {
-    panic!("TERMINAL GEOMETRIC LOCKDOWN: Geometric consistency anomaly or illegal matrix manipulation detected.");
+            let mut external_pressure = Float::with_val(128, 0.0);
+            for j in start_j..end_j {
+                external_pressure += &jacobian_matrix[current_path[next]][current_path[j]];
+            }
+
+            let delta = internal_pressure.clone() - &external_pressure;
+            let should_swap = if delta > 0.0 {
+                true
+            } else {
+                quantum_temperature > 0.01 && 
+                (rand::random::<f64>() < (-(quantum_temperature) / 20.0).exp())
+            };
+
+            if should_swap {
+                current_path.swap(i, next);
+                converged = false;
+            }
+
+            if epoch > 40 && i % 12 == 0 {
+                let target_jump = (i + rand::random::<usize>()) % n;
+                if target_jump != i && target_jump != next {
+                    current_path.swap(i, target_jump);
+                    converged = false;
+                }
+            }
+        }
+
+        quantum_temperature *= cooling_rate;
+
+        if converged && epoch > 80 {
+            break;
+        }
+    }
+
+    let unique_nodes: HashSet<&usize> = current_path.iter().collect();
+    assert_eq!(unique_nodes.len(), n);
+
+    current_path
 }
