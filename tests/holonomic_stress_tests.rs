@@ -39,7 +39,6 @@ fn test_clustered_fractal_trap_100k() {
     let mut nodes = Vec::with_capacity(n);
 
     let center_count = if n == 100000 { 100 } else { 10 };
-    let nodes_per_center = n / center_count;
 
     let mut centers = Vec::new();
     for _ in 0..center_count {
@@ -80,7 +79,7 @@ fn test_historic_germany_d15112_exact_match() {
     let file_path = "d15112.tsp";
 
     if !Path::new(file_path).exists() {
-        if let Ok(mut response) = ureq::get("https://uwaterloo.ca").call() {
+        if let Ok(response) = ureq::get("https://uwaterloo.ca").call() {
             let mut file = File::create(file_path).unwrap();
             let mut reader = response.into_reader();
             std::io::copy(&mut reader, &mut file).unwrap();
