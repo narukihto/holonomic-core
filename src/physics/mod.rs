@@ -29,9 +29,12 @@ pub fn calculate_jacobian_manifold_operator(
                 let u = path[i];
                 let v = path[j];
 
-                let metric_val = &tension.data[u][v];
-
-                jacobian[i][j] = Float::with_val(128, metric_val.clone().recip());
+                if u < n && v < tension.data[u].len() {
+                    let metric_val = &tension.data[u][v];
+                    if *metric_val != 0.0 {
+                        jacobian[i][j] = Float::with_val(128, metric_val.clone().recip());
+                    }
+                }
             }
         }
     }
