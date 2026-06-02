@@ -28,11 +28,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
             let next = (i + 1) % n;
 
             let mut internal_pressure = Float::with_val(128, 0.0);
-            let start_j = if i > k_neighbors / 2 {
-                i - k_neighbors / 2
-            } else {
-                0
-            };
+            let start_j = i.saturating_sub(k_neighbors / 2);
             let end_j = std::cmp::min(start_j + k_neighbors, n);
 
             for j in start_j..end_j {
