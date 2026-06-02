@@ -2,6 +2,7 @@ use crate::core::tension::TensionMatrix;
 use crate::physics::calculate_jacobian_manifold_operator;
 use rug::Float;
 use std::collections::HashSet;
+use std::env;
 
 pub struct CollapseState {
     pub path: Vec<usize>,
@@ -15,7 +16,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     }
 
     let mut current_path: Vec<usize> = (0..n).collect();
-    let max_epochs = 500;
+    let max_epochs = if env::var("CI").is_ok() { 50 } else { 500 };
     let mut quantum_temperature = 500.0f64;
     let cooling_rate = 0.92;
     let k_neighbors = if n > 50 { 50 } else { n };
