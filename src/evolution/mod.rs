@@ -11,7 +11,7 @@ pub struct CollapseState {
 
 pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     let n = tension.size;
-    if n < 2 {
+    if n < 3 {
         return (0..n).collect();
     }
 
