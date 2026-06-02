@@ -1,4 +1,4 @@
-use ark_penta_v_core::{collapse_to_optimum, QuantumBundleConfig, SovereignManifold};
+use ark_penta_v_core::{collapse_to_optimum, SovereignManifold};
 
 #[cfg(test)]
 mod integration_suite {
