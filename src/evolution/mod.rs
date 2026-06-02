@@ -75,7 +75,11 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     }
 
     let unique_nodes: HashSet<usize> = current_path.iter().cloned().collect();
-    assert_eq!(unique_nodes.len(), n, "Logic error: path contains duplicate nodes");
+    assert_eq!(
+        unique_nodes.len(),
+        n,
+        "Logic error: path contains duplicate nodes"
+    );
 
     current_path
 }
