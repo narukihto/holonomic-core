@@ -38,21 +38,33 @@ impl SovereignManifold {
 
     pub fn compute_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
+        let k_neighbors = if n > 50 { 50 } else { n };
+
         let matrix: Vec<Vec<f64>> = (0..n)
             .into_par_iter()
             .map(|i| {
-                (0..n)
+                let mut dists: Vec<(usize, f64)> = (0..n)
                     .map(|j| {
                         if i != j {
-                            let dist = self.euclidean_dist(self.nodes[i], self.nodes[j]);
-                            1.0 / dist
+                            (j, self.euclidean_dist(self.nodes[i], self.nodes[j]))
                         } else {
-                            0.0
+                            (j, f64::MAX)
                         }
                     })
-                    .collect()
+                    .collect();
+
+                dists.select_nth_unstable_by(k_neighbors, |a, b| a.1.partial_cmp(&b.1).unwrap());
+                
+                let mut row = vec![0.0; n];
+                for &(j, dist) in dists.iter().take(k_neighbors) {
+                    if dist > 0.0 && i != j {
+                        row[j] = 1.0 / dist;
+                    }
+                }
+                row
             })
             .collect();
+
         TensionMatrix::new(matrix)
     }
 
@@ -65,17 +77,28 @@ impl SovereignManifold {
 
     fn apply_local_manifold_pressure(&self, node: [f64; 2]) -> [f64; 2] {
         let mut force = [0.0, 0.0];
-        for &other in &self.nodes {
-            if node != other {
+        let n = self.nodes.len();
+        let k_neighbors = if n > 50 { 50 } else { n };
+
+        let mut local_nodes: Vec<(usize, f64)> = self.nodes
+            .iter()
+            .enumerate()
+            .map(|(idx, &other)| (idx, (other[0] - node[0]).powi(2) + (other[1] - node[1]).powi(2)))
+            .collect();
+
+        if local_nodes.len() > k_neighbors {
+            local_nodes.select_nth_unstable_by(k_neighbors, |a, b| a.1.partial_cmp(&b.1).unwrap());
+        }
+
+        for &(idx, dist_sq) in local_nodes.iter().take(k_neighbors) {
+            let other = self.nodes[idx];
+            if node != other && dist_sq > 0.0 {
                 let dx = other[0] - node[0];
                 let dy = other[1] - node[1];
-                let dist_sq = dx * dx + dy * dy;
                 let dist = dist_sq.sqrt();
-                if dist > 0.0 {
-                    let f = 1.0 / dist_sq;
-                    force[0] += f * dx / dist;
-                    force[1] += f * dy / dist;
-                }
+                let f = 1.0 / dist_sq;
+                force[0] += f * dx / dist;
+                force[1] += f * dy / dist;
             }
         }
         force
