@@ -23,13 +23,18 @@ pub fn calculate_jacobian_manifold_operator(
     let n = tension.size;
     let mut jacobian = vec![vec![Float::with_val(128, 0.0); n]; n];
 
+    let path_len = path.len();
+    if path_len < n {
+        return jacobian;
+    }
+
     for i in 0..n {
         for j in 0..n {
             if i != j {
                 let u = path[i];
                 let v = path[j];
 
-                if u < n && v < tension.data[u].len() {
+                if u < tension.data.len() && v < tension.data[u].len() {
                     let metric_val = &tension.data[u][v];
                     if *metric_val != 0.0 {
                         jacobian[i][j] = Float::with_val(128, metric_val.clone().recip());
