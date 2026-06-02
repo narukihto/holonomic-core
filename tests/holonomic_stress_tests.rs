@@ -173,7 +173,11 @@ fn run_and_verify_absolute_tsp(test_name: &str, nodes: &[[f64; 2]], max_seconds:
     let result = config.execute_sovereign_collapse(&manifold);
     assert!(result >= 0.0);
 
-    println!("Test: {}, Duration: {:.4}s", test_name, duration.as_secs_f64());
+    println!(
+        "Test: {}, Duration: {:.4}s",
+        test_name,
+        duration.as_secs_f64()
+    );
 
     if nodes.len() == 100000 {
         assert!(duration.as_secs() < max_seconds);
