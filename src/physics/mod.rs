@@ -5,12 +5,6 @@ pub const RESONANCE_STIFFNESS: f64 = 1.0;
 pub const DAMPING_COUNT: f64 = 0.5;
 
 pub fn calibrate_resonance_lattice() {
-    println!("[PHYSICS] Calibrating Resonance Lattice...");
-    println!(
-        "[PHYSICS] Stiffness: {}, Damping: {}",
-        RESONANCE_STIFFNESS, DAMPING_COUNT
-    );
-
     apply_field_constraints();
 }
 
@@ -23,14 +17,13 @@ pub fn calculate_jacobian_manifold_operator(
     let n = tension.size;
     let mut jacobian = vec![vec![Float::with_val(128, 0.0); n]; n];
 
-    let path_len = path.len();
-    if path_len < n {
+    if path.len() < 2 {
         return jacobian;
     }
 
     for i in 0..n {
         for j in 0..n {
-            if i != j {
+            if i != j && i < path.len() && j < path.len() {
                 let u = path[i];
                 let v = path[j];
 
