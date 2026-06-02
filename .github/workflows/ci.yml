@@ -10,48 +10,57 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  # المرحلة الأولى: الفحص السريع والرياضي (يجب أن تمر بسرعة)
   sovereign-verification:
     name: Formal Mathematical and Security Audit
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-
+    timeout-minutes: 15
     steps:
-      - name: Checkout Sovereign State
-        uses: actions/checkout@v4
-
-      - name: Setup Sovereign Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
-
-      - name: Cache Build Dependencies
-        uses: swatinem/rust-cache@v2
-
+      - uses: swatinem/rust-cache@v2
       - name: Audit Formal Syntax
         run: cargo fmt --all -- --check
-
       - name: Zero-Tolerance Static Analysis
         run: cargo clippy --all-targets --all-features -- -D warnings
-
       - name: Mathematical Integrity and Invariant Verification
         run: cargo test --verbose --release --lib
 
-      - name: Sovereign Stress Test (Holonomic & Germany Match)
-        run: cargo test --test holonomic_stress_tests --release -- --test-threads=1
+  # المرحلة الثانية: اختبارات الإجهاد (منفصلة ومحددة بوقت)
+  stress-test:
+    name: Sovereign Stress Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: sovereign-verification
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+      - name: Execution
+        run: cargo test --test holonomic_stress_tests --release -- --test-threads=1 --nocapture
 
+  # المرحلة الثالثة: القياس والبناء النهائي
+  sovereign-build:
+    name: Build & Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: stress-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
       - name: Sovereign Benchmark
         run: cargo bench -- --nocapture
-
       - name: Upload Benchmark Results
         uses: actions/upload-artifact@v4
         with:
           name: benchmark-results
           path: target/criterion/
-
       - name: Sovereign Release Build
         run: |
           cargo build --release --verbose
           strip target/release/ark_penta_v_core || true
-
       - name: Security Audit
         run: cargo run --example lwe_compliance_test --release
