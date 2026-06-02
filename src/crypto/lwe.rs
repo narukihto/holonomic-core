@@ -28,9 +28,7 @@ fn generate_lattice_noise(matrix: &TensionMatrix) -> Float {
     let total_sum: Float = matrix
         .data
         .par_iter()
-        .map(|row| {
-            row.iter().fold(Float::with_val(128, 0.0), |acc, x| acc + x)
-        })
+        .map(|row| row.iter().fold(Float::with_val(128, 0.0), |acc, x| acc + x))
         .reduce(|| Float::with_val(128, 0.0), |acc, x| acc + x);
 
     total_sum.fract()
