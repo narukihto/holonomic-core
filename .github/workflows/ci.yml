@@ -32,6 +32,24 @@ jobs:
       - uses: swatinem/rust-cache@v2
       - run: cargo test --test holonomic_stress_tests test_ultimate_random_chaos_100k --release -- --test-threads=1 --nocapture
 
+  test-p-vs-np-boundary:
+    needs: audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+      - run: cargo test --test holonomic_stress_tests test_nphard_p_vs_np_equivalence_boundary --release -- --test-threads=1 --nocapture
+
+  test-absolute-break-100k:
+    needs: audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+      - run: cargo test --test holonomic_stress_tests test_tsp_nphard_absolute_break_100k --release -- --test-threads=1 --nocapture
+
   test-fractal:
     needs: audit
     runs-on: ubuntu-latest
@@ -52,7 +70,7 @@ jobs:
 
   test-germany:
     needs: audit
-    runs-on: ubuntu-latest
+    runs-on: audit
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -62,12 +80,11 @@ jobs:
   sovereign-finalization:
     name: Build & Security Audit
     runs-on: ubuntu-latest
-    needs: [test-chaos, test-fractal, test-ring, test-germany]
+    needs: [test-chaos, test-p-vs-np-boundary, test-absolute-break-100k, test-fractal, test-ring, test-germany]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: swatinem/rust-cache@v2
-      # تم تعديل البنشمارك ليحمل توقيتًا محددًا (Timeout) لمنع الإلغاء
       - name: Sovereign Benchmark
         timeout-minutes: 5
         run: cargo bench -- --nocapture || echo "Benchmark timed out, skipping..."
