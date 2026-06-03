@@ -14,7 +14,7 @@ impl TensionMatrix {
             .into_par_iter()
             .map(|row| {
                 row.into_iter()
-                    .map(|val| Float::with_val(128, val))
+                    .map(|val| Float::with_val(64, val))
                     .collect()
             })
             .collect();
@@ -23,19 +23,19 @@ impl TensionMatrix {
     }
 
     pub fn enforce_terminal_boundary(&mut self, _t_max: f64) {
-        let decay_factor = Float::with_val(128, (-10.0f64).exp());
+        let decay_factor = Float::with_val(64, (-10.0f64).exp());
         self.data.par_iter_mut().for_each(|row| {
-            row.iter_mut().for_each(|val| {
+            for val in row.iter_mut() {
                 if *val != 0.0 {
                     *val *= &decay_factor;
                 }
-            });
+            }
         });
     }
 
     pub fn apply_asymmetric_bias(&mut self, i: usize, j: usize, bias: f64) {
         if i < self.size && j < self.data[i].len() {
-            self.data[i][j] *= Float::with_val(128, bias);
+            self.data[i][j] *= Float::with_val(64, bias);
         }
     }
 }
