@@ -2,29 +2,6 @@ use crate::core::tension::TensionMatrix;
 use rayon::prelude::*;
 
 #[derive(Clone)]
-pub struct QuantumBundleConfig {
-    pub distance_matrix: Vec<Vec<f64>>,
-    pub adiabatic_time: f64,
-}
-
-impl QuantumBundleConfig {
-    pub fn execute_sovereign_collapse(&self, manifold: &SovereignManifold) -> f64 {
-        let mut matrix = manifold.compute_tension_matrix();
-        matrix.enforce_terminal_boundary(self.adiabatic_time);
-        1.0
-    }
-}
-
-pub struct HolonomicQuantumSolver {
-    pub config: QuantumBundleConfig,
-}
-
-impl HolonomicQuantumSolver {
-    pub fn new(config: QuantumBundleConfig) -> Self {
-        Self { config }
-    }
-}
-
 pub struct SovereignManifold {
     pub nodes: Vec<[f64; 2]>,
 }
@@ -36,48 +13,32 @@ impl SovereignManifold {
         }
     }
 
-    pub fn size(&self) -> usize {
-        self.nodes.len()
-    }
-
     pub fn compute_tension_matrix(&self) -> TensionMatrix {
         self.compute_sparse_tension_matrix()
     }
 
     pub fn compute_sparse_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
+        let mut matrix = vec![vec![0.0; n]; n];
 
-        let matrix: Vec<Vec<f64>> = (0..n)
-            .into_par_iter()
-            .map(|i| {
-                let mut row = vec![0.0; n];
-                let mut neighbors: Vec<(usize, f64)> = (0..n)
-                    .filter(|&j| i != j)
-                    .map(|j| (j, self.euclidean_dist(self.nodes[i], self.nodes[j])))
-                    .collect();
+        (0..n).into_par_iter().for_each(|i| {
+            let mut neighbors: Vec<(usize, f64)> = (0..n)
+                .filter(|&j| i != j)
+                .map(|j| (j, self.euclidean_dist(self.nodes[i], self.nodes[j])))
+                .collect();
 
-                let k = if n > 1000 {
-                    20
-                } else if n > 50 {
-                    50
-                } else {
-                    neighbors.len()
-                };
-                let target_k = k.min(neighbors.len());
+            let k = if n > 1000 { 20 } else { 50 };
+            let target_k = k.min(neighbors.len());
 
-                if target_k > 0 {
-                    neighbors.select_nth_unstable_by(target_k - 1, |a, b| {
-                        a.1.partial_cmp(&b.1).unwrap()
-                    });
-                    for &(j, dist) in neighbors.iter().take(target_k) {
-                        if dist > 0.0 {
-                            row[j] = 1.0 / dist;
-                        }
+            if target_k > 0 {
+                neighbors.select_nth_unstable_by(target_k - 1, |a, b| a.1.partial_cmp(&b.1).unwrap());
+                for &(j, dist) in neighbors.iter().take(target_k) {
+                    if dist > 1e-9 {
+                        matrix[i][j] = 1.0 / dist;
                     }
                 }
-                row
-            })
-            .collect();
+            }
+        });
 
         TensionMatrix::new(matrix)
     }
@@ -106,13 +67,8 @@ impl SovereignManifold {
             })
             .collect();
 
-        let k = if n > 1000 {
-            20
-        } else if loc.len() > 50 {
-            50
-        } else {
-            loc.len()
-        };
+        let k = if n > 1000 { 20 } else { 50 };
+        let k = k.min(loc.len());
 
         if k > 0 {
             loc.select_nth_unstable_by(k - 1, |a, b| a.1.partial_cmp(&b.1).unwrap());
