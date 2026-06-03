@@ -45,12 +45,12 @@ impl SovereignManifold {
         if n == 0 {
             return TensionMatrix::new(vec![]);
         }
-        let k_neighbors = if n > 50 { 50 } else { n.saturating_sub(1) };
+        let k = if n > 50 { 50 } else { n.saturating_sub(1) };
 
         let matrix: Vec<Vec<f64>> = (0..n)
             .into_par_iter()
             .map(|i| {
-                let mut dists: Vec<(usize, f64)> = (0..n)
+                let mut d: Vec<(usize, f64)> = (0..n)
                     .map(|j| {
                         if i != j {
                             (j, self.euclidean_dist(self.nodes[i], self.nodes[j]))
@@ -60,13 +60,13 @@ impl SovereignManifold {
                     })
                     .collect();
 
-                if k_neighbors > 0 && k_neighbors < n {
-                    dists.select_nth_unstable_by(k_neighbors, |a, b| a.1.partial_cmp(&b.1).unwrap());
+                if k > 0 && k < n {
+                    d.select_nth_unstable_by(k, |a, b| a.1.partial_cmp(&b.1).unwrap());
                 }
 
                 let mut row = vec![0.0; n];
-                let take_n = if k_neighbors == 0 { 0 } else { k_neighbors };
-                for &(j, dist) in dists.iter().take(take_n) {
+                let take_n = if k == 0 { 0 } else { k };
+                for &(j, dist) in d.iter().take(take_n) {
                     if dist > 0.0 && dist != f64::MAX && i != j {
                         row[j] = 1.0 / dist;
                     }
@@ -91,25 +91,22 @@ impl SovereignManifold {
         if n < 2 {
             return force;
         }
-        let k_neighbors = if n > 50 { 50 } else { n.saturating_sub(1) };
+        let k = if n > 50 { 50 } else { n.saturating_sub(1) };
 
-        let mut local_nodes: Vec<(usize, f64)> = self
+        let mut loc: Vec<(usize, f64)> = self
             .nodes
             .iter()
             .enumerate()
             .map(|(idx, &other)| {
-                (
-                    idx,
-                    (other[0] - node[0]).powi(2) + (other[1] - node[1]).powi(2),
-                )
+                (idx, (other[0] - node[0]).powi(2) + (other[1] - node[1]).powi(2))
             })
             .collect();
 
-        if k_neighbors > 0 && k_neighbors < n {
-            local_nodes.select_nth_unstable_by(k_neighbors, |a, b| a.1.partial_cmp(&b.1).unwrap());
+        if k > 0 && k < n {
+            loc.select_nth_unstable_by(k, |a, b| a.1.partial_cmp(&b.1).unwrap());
         }
 
-        for &(idx, dist_sq) in local_nodes.iter().take(k_neighbors) {
+        for &(idx, dist_sq) in loc.iter().take(k) {
             let other = self.nodes[idx];
             if node != other && dist_sq > 0.0 {
                 let dx = other[0] - node[0];
