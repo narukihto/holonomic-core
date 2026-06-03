@@ -120,7 +120,6 @@ fn test_historic_germany_d15112_exact_match() {
 
             let calculated_score = total_distance.round() as u64;
             let exact_optimal_distance: u64 = 1573084;
-            
             assert_eq!(calculated_score, exact_optimal_distance);
             println!("Duration: {:.4}s", duration.as_secs_f64());
         }
@@ -148,7 +147,11 @@ fn run_and_verify_absolute_tsp(test_name: &str, nodes: &[[f64; 2]], max_seconds:
     let result = config.execute_sovereign_collapse(&manifold);
     assert!(result >= 0.0);
 
-    println!("Test: {}, Duration: {:.4}s", test_name, duration.as_secs_f64());
+    println!(
+        "Test: {}, Duration: {:.4}s",
+        test_name,
+        duration.as_secs_f64()
+    );
     if env::var("CI").is_err() && nodes.len() >= 100000 {
         assert!(duration.as_secs() < max_seconds);
     }
