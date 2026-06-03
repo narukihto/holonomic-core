@@ -9,7 +9,7 @@ pub struct QuantumBundleConfig {
 
 impl QuantumBundleConfig {
     pub fn execute_sovereign_collapse(&self, manifold: &SovereignManifold) -> f64 {
-        let mut matrix = manifold.compute_sparse_tension_matrix();
+        let mut matrix = manifold.compute_tension_matrix();
         matrix.enforce_terminal_boundary(self.adiabatic_time);
         1.0
     }
@@ -40,6 +40,12 @@ impl SovereignManifold {
         self.nodes.len()
     }
 
+    // واجهة توافقية لضمان عمل الاختبارات الحالية دون تعديل
+    pub fn compute_tension_matrix(&self) -> TensionMatrix {
+        self.compute_sparse_tension_matrix()
+    }
+
+    // المنطق الجديد المحسن (Sparse) لكسر حاجز الذاكرة
     pub fn compute_sparse_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
         let k = if n > 50 { 50 } else { n.saturating_sub(1) };
