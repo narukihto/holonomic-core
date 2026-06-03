@@ -4,11 +4,6 @@ use rug::Float;
 use std::collections::HashSet;
 use std::env;
 
-pub struct CollapseState {
-    pub path: Vec<usize>,
-    pub iteration: u64,
-}
-
 pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     let n = tension.size;
     if n < 3 {
@@ -27,8 +22,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
         for i in 0..n {
             let next = (i + 1) % n;
-
-            let mut internal_pressure = Float::with_val(128, 0.0);
+            let mut internal_pressure = Float::with_val(64, 0.0);
             let start_j = i.saturating_sub(k_neighbors / 2);
             let end_j = std::cmp::min(start_j + k_neighbors + 1, n);
 
@@ -38,7 +32,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                 }
             }
 
-            let mut external_pressure = Float::with_val(128, 0.0);
+            let mut external_pressure = Float::with_val(64, 0.0);
             for j in start_j..end_j {
                 if j < n && next < n {
                     external_pressure += &jacobian_matrix[current_path[next]][current_path[j]];
@@ -49,8 +43,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
             let should_swap = if delta > 0.0 {
                 true
             } else {
-                quantum_temperature > 0.01
-                    && (rand::random::<f64>() < (-(quantum_temperature) / 20.0).exp())
+                quantum_temperature > 0.01 && (rand::random::<f64>() < (-(quantum_temperature) / 20.0).exp())
             };
 
             if should_swap && i != next {
@@ -66,20 +59,13 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                 }
             }
         }
-
         quantum_temperature *= cooling_rate;
-
         if converged && epoch > 20 {
             break;
         }
     }
 
     let unique_nodes: HashSet<usize> = current_path.iter().cloned().collect();
-    assert_eq!(
-        unique_nodes.len(),
-        n,
-        "Logic error: path contains duplicate nodes"
-    );
-
+    assert_eq!(unique_nodes.len(), n, "Logic error: duplicate nodes");
     current_path
 }
