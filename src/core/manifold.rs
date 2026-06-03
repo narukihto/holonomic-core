@@ -40,16 +40,13 @@ impl SovereignManifold {
         self.nodes.len()
     }
 
-    // واجهة توافقية لضمان عمل الاختبارات الحالية دون تعديل
     pub fn compute_tension_matrix(&self) -> TensionMatrix {
         self.compute_sparse_tension_matrix()
     }
 
-    // المنطق الجديد المحسن (Sparse) لكسر حاجز الذاكرة
     pub fn compute_sparse_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
-        let k = if n > 50 { 50 } else { n.saturating_sub(1) };
-
+        
         let sparse_data: Vec<Vec<f64>> = (0..n)
             .into_par_iter()
             .map(|i| {
@@ -59,13 +56,14 @@ impl SovereignManifold {
                     .map(|j| (j, self.euclidean_dist(self.nodes[i], self.nodes[j])))
                     .collect();
 
-                if k > 0 && k < n {
-                    neighbors.select_nth_unstable_by(k, |a, b| a.1.partial_cmp(&b.1).unwrap());
-                }
+                let k = if neighbors.len() > 50 { 50 } else { neighbors.len() };
 
-                for &(j, dist) in neighbors.iter().take(k) {
-                    if dist > 0.0 {
-                        row[j] = 1.0 / dist;
+                if k > 0 {
+                    neighbors.select_nth_unstable_by(k - 1, |a, b| a.1.partial_cmp(&b.1).unwrap());
+                    for &(j, dist) in neighbors.iter().take(k) {
+                        if dist > 0.0 {
+                            row[j] = 1.0 / dist;
+                        }
                     }
                 }
                 row
@@ -84,36 +82,23 @@ impl SovereignManifold {
 
     fn apply_local_manifold_pressure(&self, node: [f64; 2]) -> [f64; 2] {
         let mut force = [0.0, 0.0];
-        let n = self.nodes.len();
-        if n < 2 {
-            return force;
-        }
-        let k = if n > 50 { 50 } else { n.saturating_sub(1) };
-
-        let mut loc: Vec<(usize, f64)> = self
-            .nodes
-            .iter()
-            .enumerate()
+        let mut loc: Vec<(usize, f64)> = self.nodes.iter().enumerate()
             .filter(|(_, &other)| other != node)
-            .map(|(idx, &other)| {
-                (
-                    idx,
-                    (other[0] - node[0]).powi(2) + (other[1] - node[1]).powi(2),
-                )
-            })
+            .map(|(idx, &other)| (idx, (other[0]-node[0]).powi(2) + (other[1]-node[1]).powi(2)))
             .collect();
 
-        if k > 0 && k < loc.len() {
-            loc.select_nth_unstable_by(k, |a, b| a.1.partial_cmp(&b.1).unwrap());
-        }
+        let k = if loc.len() > 50 { 50 } else { loc.len() };
 
-        for &(idx, dist_sq) in loc.iter().take(k) {
-            let other = self.nodes[idx];
-            if dist_sq > 0.0 {
-                let dist = dist_sq.sqrt();
-                let f = 1.0 / dist_sq;
-                force[0] += f * (other[0] - node[0]) / dist;
-                force[1] += f * (other[1] - node[1]) / dist;
+        if k > 0 {
+            loc.select_nth_unstable_by(k - 1, |a, b| a.1.partial_cmp(&b.1).unwrap());
+            for &(idx, dist_sq) in loc.iter().take(k) {
+                let other = self.nodes[idx];
+                if dist_sq > 0.0 {
+                    let dist = dist_sq.sqrt();
+                    let f = 1.0 / dist_sq;
+                    force[0] += f * (other[0] - node[0]) / dist;
+                    force[1] += f * (other[1] - node[1]) / dist;
+                }
             }
         }
         force
