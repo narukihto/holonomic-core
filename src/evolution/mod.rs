@@ -43,7 +43,8 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
             let should_swap = if delta > 0.0 {
                 true
             } else {
-                quantum_temperature > 0.01 && (rand::random::<f64>() < (-(quantum_temperature) / 20.0).exp())
+                quantum_temperature > 0.01
+                    && (rand::random::<f64>() < (-(quantum_temperature) / 20.0).exp())
             };
 
             if should_swap && i != next {
