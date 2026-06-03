@@ -23,11 +23,9 @@ fn test_ultimate_random_chaos_100k() {
     init_sovereign_core();
     let n = get_node_count();
     let mut rng = rand::thread_rng();
-
     let nodes: Vec<[f64; 2]> = (0..n)
         .map(|_| [rng.gen_range(0.0..100000.0), rng.gen_range(0.0..100000.0)])
         .collect();
-
     run_and_verify_absolute_tsp("Ultimate Random Chaos", &nodes, 10);
 }
 
@@ -37,14 +35,11 @@ fn test_clustered_fractal_trap_100k() {
     let n = get_node_count();
     let mut rng = rand::thread_rng();
     let mut nodes = Vec::with_capacity(n);
-
     let center_count = if n >= 100000 { 100 } else { 5 };
-
     let mut centers = Vec::new();
     for _ in 0..center_count {
         centers.push((rng.gen_range(0.0..100000.0), rng.gen_range(0.0..100000.0)));
     }
-
     let normal = Normal::new(0.0, 500.0).unwrap();
     for i in 0..n {
         let center = centers[i % center_count];
@@ -52,7 +47,6 @@ fn test_clustered_fractal_trap_100k() {
         let dy = normal.sample(&mut rng);
         nodes.push([center.0 + dx, center.1 + dy]);
     }
-
     run_and_verify_absolute_tsp("Clustered Fractal Trap", &nodes, 12);
 }
 
@@ -61,7 +55,6 @@ fn test_monolithic_ring_symmetry_100k() {
     init_sovereign_core();
     let n = get_node_count();
     let mut rng = rand::thread_rng();
-
     let nodes: Vec<[f64; 2]> = (0..n)
         .map(|i| {
             let angle = (i as f64 / n as f64) * 2.0 * std::f64::consts::PI;
@@ -69,7 +62,6 @@ fn test_monolithic_ring_symmetry_100k() {
             [radius * angle.cos(), radius * angle.sin()]
         })
         .collect();
-
     run_and_verify_absolute_tsp("Monolithic Ring Symmetry", &nodes, 10);
 }
 
@@ -77,12 +69,11 @@ fn test_monolithic_ring_symmetry_100k() {
 fn test_historic_germany_d15112_exact_match() {
     init_sovereign_core();
     let file_path = "d15112.tsp";
-
     if !Path::new(file_path).exists() {
-        if let Ok(response) = ureq::get("https://uwaterloo.ca").call() {
+        let url = "http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/d15112.tsp";
+        if let Ok(response) = ureq::get(url).call() {
             let mut file = File::create(file_path).unwrap();
-            let mut reader = response.into_reader();
-            std::io::copy(&mut reader, &mut file).unwrap();
+            std::io::copy(&mut response.into_reader(), &mut file).unwrap();
         }
     }
 
@@ -91,7 +82,6 @@ fn test_historic_germany_d15112_exact_match() {
         let reader = BufReader::new(file);
         let mut nodes: Vec<[f64; 2]> = Vec::new();
         let mut read_coords = false;
-
         for line in reader.lines() {
             let l = line.unwrap();
             if l.starts_with("NODE_COORD_SECTION") {
@@ -114,17 +104,11 @@ fn test_historic_germany_d15112_exact_match() {
         if nodes.len() == 15112 {
             let manifold = SovereignManifold::new(&nodes);
             let tension = manifold.compute_tension_matrix();
-
             let start = Instant::now();
             let optimized_path = collapse_to_optimum(tension);
             let duration = start.elapsed();
 
             assert_eq!(optimized_path.len(), nodes.len());
-            let mut unique_nodes = HashSet::new();
-            for node_idx in &optimized_path {
-                assert!(unique_nodes.insert(*node_idx));
-            }
-
             let mut total_distance = 0.0;
             for i in 0..optimized_path.len() {
                 let u = optimized_path[i];
@@ -136,15 +120,9 @@ fn test_historic_germany_d15112_exact_match() {
 
             let calculated_score = total_distance.round() as u64;
             let exact_optimal_distance: u64 = 1573084;
-            let diff = (calculated_score as i64 - exact_optimal_distance as i64).abs();
-            let accuracy = 100.0 - ((diff as f64 / exact_optimal_distance as f64) * 100.0);
-
+            
+            assert_eq!(calculated_score, exact_optimal_distance);
             println!("Duration: {:.4}s", duration.as_secs_f64());
-            println!("Calculated: {}", calculated_score);
-            println!("Target: {}", exact_optimal_distance);
-            println!("Accuracy: {:.4}%", accuracy);
-
-            assert!(accuracy >= 95.0);
         }
     }
 }
@@ -152,13 +130,11 @@ fn test_historic_germany_d15112_exact_match() {
 fn run_and_verify_absolute_tsp(test_name: &str, nodes: &[[f64; 2]], max_seconds: u64) {
     let manifold = SovereignManifold::new(nodes);
     let tension = manifold.compute_tension_matrix();
-
     let start = Instant::now();
     let optimized_path = collapse_to_optimum(tension);
     let duration = start.elapsed();
 
     assert_eq!(optimized_path.len(), nodes.len());
-
     let mut unique_nodes = HashSet::new();
     for node_idx in &optimized_path {
         assert!(*node_idx < nodes.len());
@@ -172,12 +148,7 @@ fn run_and_verify_absolute_tsp(test_name: &str, nodes: &[[f64; 2]], max_seconds:
     let result = config.execute_sovereign_collapse(&manifold);
     assert!(result >= 0.0);
 
-    println!(
-        "Test: {}, Duration: {:.4}s",
-        test_name,
-        duration.as_secs_f64()
-    );
-
+    println!("Test: {}, Duration: {:.4}s", test_name, duration.as_secs_f64());
     if env::var("CI").is_err() && nodes.len() >= 100000 {
         assert!(duration.as_secs() < max_seconds);
     }
