@@ -98,7 +98,10 @@ impl SovereignManifold {
             .iter()
             .enumerate()
             .map(|(idx, &other)| {
-                (idx, (other[0] - node[0]).powi(2) + (other[1] - node[1]).powi(2))
+                (
+                    idx,
+                    (other[0] - node[0]).powi(2) + (other[1] - node[1]).powi(2),
+                )
             })
             .collect();
 
