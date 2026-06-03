@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use rug::Float;
 
 #[derive(Clone, Debug)]
@@ -10,7 +11,7 @@ impl TensionMatrix {
     pub fn new(matrix: Vec<Vec<f64>>) -> Self {
         let size = matrix.len();
         let data: Vec<Vec<Float>> = matrix
-            .into_iter()
+            .into_par_iter()
             .map(|row| {
                 row.into_iter()
                     .map(|val| Float::with_val(128, val))
@@ -23,13 +24,13 @@ impl TensionMatrix {
 
     pub fn enforce_terminal_boundary(&mut self, _t_max: f64) {
         let decay_factor = Float::with_val(128, (-10.0f64).exp());
-        for row in self.data.iter_mut() {
-            for val in row.iter_mut() {
+        self.data.par_iter_mut().for_each(|row| {
+            row.iter_mut().for_each(|val| {
                 if *val != 0.0 {
                     *val *= &decay_factor;
                 }
-            }
-        }
+            });
+        });
     }
 
     pub fn apply_asymmetric_bias(&mut self, i: usize, j: usize, bias: f64) {
