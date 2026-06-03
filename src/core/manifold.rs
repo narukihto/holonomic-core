@@ -9,7 +9,7 @@ pub struct QuantumBundleConfig {
 
 impl QuantumBundleConfig {
     pub fn execute_sovereign_collapse(&self, manifold: &SovereignManifold) -> f64 {
-        let mut matrix = manifold.compute_tension_matrix();
+        let mut matrix = manifold.compute_sparse_tension_matrix();
         matrix.enforce_terminal_boundary(self.adiabatic_time);
         1.0
     }
@@ -40,34 +40,25 @@ impl SovereignManifold {
         self.nodes.len()
     }
 
-    pub fn compute_tension_matrix(&self) -> TensionMatrix {
+    pub fn compute_sparse_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
-        if n == 0 {
-            return TensionMatrix::new(vec![]);
-        }
         let k = if n > 50 { 50 } else { n.saturating_sub(1) };
 
-        let matrix: Vec<Vec<f64>> = (0..n)
+        let sparse_data: Vec<Vec<f64>> = (0..n)
             .into_par_iter()
             .map(|i| {
-                let mut d: Vec<(usize, f64)> = (0..n)
-                    .map(|j| {
-                        if i != j {
-                            (j, self.euclidean_dist(self.nodes[i], self.nodes[j]))
-                        } else {
-                            (j, f64::MAX)
-                        }
-                    })
+                let mut row = vec![0.0; n];
+                let mut neighbors: Vec<(usize, f64)> = (0..n)
+                    .filter(|&j| i != j)
+                    .map(|j| (j, self.euclidean_dist(self.nodes[i], self.nodes[j])))
                     .collect();
 
                 if k > 0 && k < n {
-                    d.select_nth_unstable_by(k, |a, b| a.1.partial_cmp(&b.1).unwrap());
+                    neighbors.select_nth_unstable_by(k, |a, b| a.1.partial_cmp(&b.1).unwrap());
                 }
 
-                let mut row = vec![0.0; n];
-                let take_n = if k == 0 { 0 } else { k };
-                for &(j, dist) in d.iter().take(take_n) {
-                    if dist > 0.0 && dist != f64::MAX && i != j {
+                for &(j, dist) in neighbors.iter().take(k) {
+                    if dist > 0.0 {
                         row[j] = 1.0 / dist;
                     }
                 }
@@ -75,7 +66,7 @@ impl SovereignManifold {
             })
             .collect();
 
-        TensionMatrix::new(matrix)
+        TensionMatrix::new(sparse_data)
     }
 
     pub fn compute_gradient_collapse(&self, nodes: &[[f64; 2]]) -> Vec<[f64; 2]> {
@@ -97,6 +88,7 @@ impl SovereignManifold {
             .nodes
             .iter()
             .enumerate()
+            .filter(|(_, &other)| other != node)
             .map(|(idx, &other)| {
                 (
                     idx,
@@ -105,19 +97,17 @@ impl SovereignManifold {
             })
             .collect();
 
-        if k > 0 && k < n {
+        if k > 0 && k < loc.len() {
             loc.select_nth_unstable_by(k, |a, b| a.1.partial_cmp(&b.1).unwrap());
         }
 
         for &(idx, dist_sq) in loc.iter().take(k) {
             let other = self.nodes[idx];
-            if node != other && dist_sq > 0.0 {
-                let dx = other[0] - node[0];
-                let dy = other[1] - node[1];
+            if dist_sq > 0.0 {
                 let dist = dist_sq.sqrt();
                 let f = 1.0 / dist_sq;
-                force[0] += f * dx / dist;
-                force[1] += f * dy / dist;
+                force[0] += f * (other[0] - node[0]) / dist;
+                force[1] += f * (other[1] - node[1]) / dist;
             }
         }
         force
