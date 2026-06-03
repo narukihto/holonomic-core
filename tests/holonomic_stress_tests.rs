@@ -13,7 +13,12 @@ fn test_nphard_p_vs_np_equivalence_boundary() {
 
     for n in scales {
         let nodes: Vec<[f64; 2]> = (0..n)
-            .map(|_| [rng.gen_range(0.0..1_000_000.0), rng.gen_range(0.0..1_000_000.0)])
+            .map(|_| {
+                [
+                    rng.gen_range(0.0..1_000_000.0),
+                    rng.gen_range(0.0..1_000_000.0),
+                ]
+            })
             .collect();
 
         let start = Instant::now();
@@ -40,7 +45,12 @@ fn test_tsp_nphard_absolute_break_100k() {
     let mut rng = rand::thread_rng();
 
     let nodes: Vec<[f64; 2]> = (0..n)
-        .map(|_| [rng.gen_range(0.0..100000.0), rng.gen_range(0.0..100000.0)])
+        .map(|_| {
+            [
+                rng.gen_range(0.0..100000.0),
+                rng.gen_range(0.0..100000.0),
+            ]
+        })
         .collect();
 
     let manifold = SovereignManifold::new(&nodes);
