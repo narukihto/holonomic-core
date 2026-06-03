@@ -44,13 +44,13 @@ impl SovereignManifold {
         self.compute_sparse_tension_matrix()
     }
 
-    // هنا التحول الجذري: لا ننشئ مصفوفة n*n، بل نحتفظ فقط ببيانات الجيران
     pub fn compute_sparse_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
 
-        let sparse_data: Vec<Vec<(usize, f64)>> = (0..n)
+        let matrix: Vec<Vec<f64>> = (0..n)
             .into_par_iter()
             .map(|i| {
+                let mut row = vec![0.0; n];
                 let mut neighbors: Vec<(usize, f64)> = (0..n)
                     .filter(|&j| i != j)
                     .map(|j| (j, self.euclidean_dist(self.nodes[i], self.nodes[j])))
@@ -65,14 +65,13 @@ impl SovereignManifold {
                 };
                 let target_k = k.min(neighbors.len());
 
-                let mut row = Vec::with_capacity(target_k);
                 if target_k > 0 {
                     neighbors.select_nth_unstable_by(target_k - 1, |a, b| {
                         a.1.partial_cmp(&b.1).unwrap()
                     });
                     for &(j, dist) in neighbors.iter().take(target_k) {
                         if dist > 0.0 {
-                            row.push((j, 1.0 / dist));
+                            row[j] = 1.0 / dist;
                         }
                     }
                 }
@@ -80,8 +79,7 @@ impl SovereignManifold {
             })
             .collect();
 
-        // ملاحظة: افترضنا أن TensionMatrix يقبل هيكل البيانات المحدث
-        TensionMatrix::from_sparse(sparse_data)
+        TensionMatrix::new(matrix)
     }
 
     pub fn compute_gradient_collapse(&self, nodes: &[[f64; 2]]) -> Vec<[f64; 2]> {
