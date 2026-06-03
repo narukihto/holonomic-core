@@ -46,7 +46,7 @@ impl SovereignManifold {
 
     pub fn compute_sparse_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
-        
+
         let sparse_data: Vec<Vec<f64>> = (0..n)
             .into_par_iter()
             .map(|i| {
@@ -56,7 +56,11 @@ impl SovereignManifold {
                     .map(|j| (j, self.euclidean_dist(self.nodes[i], self.nodes[j])))
                     .collect();
 
-                let k = if neighbors.len() > 50 { 50 } else { neighbors.len() };
+                let k = if neighbors.len() > 50 {
+                    50
+                } else {
+                    neighbors.len()
+                };
 
                 if k > 0 {
                     neighbors.select_nth_unstable_by(k - 1, |a, b| a.1.partial_cmp(&b.1).unwrap());
@@ -82,9 +86,17 @@ impl SovereignManifold {
 
     fn apply_local_manifold_pressure(&self, node: [f64; 2]) -> [f64; 2] {
         let mut force = [0.0, 0.0];
-        let mut loc: Vec<(usize, f64)> = self.nodes.iter().enumerate()
+        let mut loc: Vec<(usize, f64)> = self
+            .nodes
+            .iter()
+            .enumerate()
             .filter(|(_, &other)| other != node)
-            .map(|(idx, &other)| (idx, (other[0]-node[0]).powi(2) + (other[1]-node[1]).powi(2)))
+            .map(|(idx, &other)| {
+                (
+                    idx,
+                    (other[0] - node[0]).powi(2) + (other[1] - node[1]).powi(2),
+                )
+            })
             .collect();
 
         let k = if loc.len() > 50 { 50 } else { loc.len() };
