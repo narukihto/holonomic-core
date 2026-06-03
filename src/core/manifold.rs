@@ -61,7 +61,9 @@ impl SovereignManifold {
                     .collect();
 
                 if k_neighbors > 0 && k_neighbors < n {
-                    dists.select_nth_unstable_by(k_neighbors, |a, b| a.1.partial_cmp(&b.1).unwrap());
+                    dists.select_nth_unstable_by(k_neighbors, |a, b| {
+                        a.1.partial_cmp(&b.1).unwrap()
+                    });
                 }
 
                 let mut row = vec![0.0; n];
@@ -106,7 +108,9 @@ impl SovereignManifold {
             .collect();
 
         if k_neighbors > 0 && k_neighbors < n {
-            local_nodes.select_nth_unstable_by(k_neighbors, |a, b| a.1.partial_cmp(&b.1).unwrap());
+            local_nodes.select_nth_unstable_by(k_neighbors, |a, b| {
+                a.1.partial_cmp(&b.1).unwrap()
+            });
         }
 
         for &(idx, dist_sq) in local_nodes.iter().take(k_neighbors) {
