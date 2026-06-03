@@ -1,6 +1,15 @@
 use crate::core::tension::TensionMatrix;
 use rug::Float;
 
+pub const RESONANCE_STIFFNESS: f64 = 1.0;
+pub const DAMPING_COUNT: f64 = 0.5;
+
+pub fn calibrate_resonance_lattice() {
+    apply_field_constraints();
+}
+
+fn apply_field_constraints() {}
+
 pub fn calculate_jacobian_manifold_operator(
     path: &[usize],
     tension: &TensionMatrix,
