@@ -56,15 +56,13 @@ impl SovereignManifold {
                     .map(|j| (j, self.euclidean_dist(self.nodes[i], self.nodes[j])))
                     .collect();
 
-                let k = if neighbors.len() > 50 {
-                    50
-                } else {
-                    neighbors.len()
-                };
+                // الانهيار الاستراتيجي: تقليل الـ k في المسائل الضخمة لتسريع التنفيذ
+                let k = if n > 1000 { 20 } else if n > 50 { 50 } else { neighbors.len() };
+                let target_k = k.min(neighbors.len());
 
-                if k > 0 {
-                    neighbors.select_nth_unstable_by(k - 1, |a, b| a.1.partial_cmp(&b.1).unwrap());
-                    for &(j, dist) in neighbors.iter().take(k) {
+                if target_k > 0 {
+                    neighbors.select_nth_unstable_by(target_k - 1, |a, b| a.1.partial_cmp(&b.1).unwrap());
+                    for &(j, dist) in neighbors.iter().take(target_k) {
                         if dist > 0.0 {
                             row[j] = 1.0 / dist;
                         }
@@ -86,6 +84,8 @@ impl SovereignManifold {
 
     fn apply_local_manifold_pressure(&self, node: [f64; 2]) -> [f64; 2] {
         let mut force = [0.0, 0.0];
+        let n = self.nodes.len();
+        
         let mut loc: Vec<(usize, f64)> = self
             .nodes
             .iter()
@@ -99,13 +99,15 @@ impl SovereignManifold {
             })
             .collect();
 
-        let k = if loc.len() > 50 { 50 } else { loc.len() };
+        // الانهيار الاستراتيجي: تقليل الـ k ديناميكياً
+        let k = if n > 1000 { 20 } else if loc.len() > 50 { 50 } else { loc.len() };
 
         if k > 0 {
             loc.select_nth_unstable_by(k - 1, |a, b| a.1.partial_cmp(&b.1).unwrap());
             for &(idx, dist_sq) in loc.iter().take(k) {
                 let other = self.nodes[idx];
-                if dist_sq > 0.0 {
+                // حماية من القيم القريبة من الصفر لتجنب الانهيار الحسابي
+                if dist_sq > 1e-9 {
                     let dist = dist_sq.sqrt();
                     let f = 1.0 / dist_sq;
                     force[0] += f * (other[0] - node[0]) / dist;
