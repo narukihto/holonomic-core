@@ -88,7 +88,6 @@ fn test_historic_germany_d15112_exact_match() {
             let manifold = SovereignManifold::new(&nodes);
             let tension = manifold.compute_tension_matrix();
             let optimized_path = collapse_to_optimum(tension);
-            
             let mut total_distance = 0.0;
             for i in 0..optimized_path.len() {
                 let u = optimized_path[i];
