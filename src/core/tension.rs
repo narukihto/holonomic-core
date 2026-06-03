@@ -14,7 +14,13 @@ impl TensionMatrix {
             .into_par_iter()
             .map(|row| {
                 row.into_iter()
-                    .map(|val| Float::with_val(64, val))
+                    .map(|val| {
+                        if val == 0.0 {
+                            Float::with_val(64, 0.0)
+                        } else {
+                            Float::with_val(64, val)
+                        }
+                    })
                     .collect()
             })
             .collect();
