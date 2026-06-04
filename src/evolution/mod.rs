@@ -33,26 +33,68 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         visited[current] = true;
     }
 
-    for _ in 0..6 {
-        let mut improved = false;
-        for i in 0..n - 3 {
-            let next_i = i + 1;
-            let end = (i + 160).min(n);
+    let mut pos = vec![0; n];
+    for (index, &node) in path.iter().enumerate() {
+        pos[node] = index;
+    }
 
-            for j in i + 2..end {
-                let next_j = (j + 1) % n;
+    let mut improved = true;
+    let mut iterations = 0;
+
+    while improved && iterations < 4 {
+        improved = false;
+        iterations += 1;
+
+        for u in 0..n {
+            let row = &tension.data[u];
+            let mut n1 = u;
+            let mut n2 = u;
+            let mut m1 = f64::MAX;
+            let mut m2 = f64::MAX;
+
+            for (v, &cost) in row.iter().enumerate() {
+                if v != u {
+                    if cost < m1 {
+                        m2 = m1;
+                        n2 = n1;
+                        m1 = cost;
+                        n1 = v;
+                    } else if cost < m2 {
+                        m2 = cost;
+                        n2 = v;
+                    }
+                }
+            }
+
+            for v in [n1, n2] {
+                let idx_u = pos[u];
+                let idx_v = pos[v];
+
+                if idx_u == idx_v {
+                    continue;
+                }
+
+                let i = idx_u.min(idx_v);
+                let j = idx_u.max(idx_v);
+
+                if i + 1 >= j || j >= n - 1 {
+                    continue;
+                }
+
+                let next_i = i + 1;
+                let next_j = j + 1;
 
                 let d1 = tension.data[path[i]][path[next_i]] + tension.data[path[j]][path[next_j]];
                 let d2 = tension.data[path[i]][path[j]] + tension.data[path[next_i]][path[next_j]];
 
                 if d2 < d1 {
                     path[next_i..=j].reverse();
+                    for k in next_i..=j {
+                        pos[path[k]] = k;
+                    }
                     improved = true;
                 }
             }
-        }
-        if !improved {
-            break;
         }
     }
 
