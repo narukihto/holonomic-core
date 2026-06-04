@@ -27,11 +27,11 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         }
     }
 
-    for _ in 0..2 {
+    for _ in 0..10 {
         let mut improved = false;
         for i in 0..n - 3 {
             let next_i = i + 1;
-            let end = (i + 41).min(n);
+            let end = (i + 51).min(n);
             for j in i + 2..end {
                 let next_j = (j + 1) % n;
 
