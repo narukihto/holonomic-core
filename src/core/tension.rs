@@ -25,7 +25,7 @@ impl TensionMatrix {
 
     pub fn apply_asymmetric_bias(&mut self, i: usize, j: usize, bias: f64) {
         if i < self.size && j < self.data[i].len() {
-            self.data[i][j] *= bias;
+            self.data[i][j] = (self.data[i][j] * bias).clamp(1e-9, 1e6);
         }
     }
 }
