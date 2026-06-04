@@ -39,10 +39,8 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                 let next_i = i + 1;
                 for j in i + 2..p_len - 1 {
                     let next_j = j + 1;
-                    let d1 = tension.data[path[i]][path[next_i]]
-                        + tension.data[path[j]][path[next_j]];
-                    let d2 = tension.data[path[i]][path[j]]
-                        + tension.data[path[next_i]][path[next_j]];
+                    let d1 = tension.data[path[i]][path[next_i]] + tension.data[path[j]][path[next_j]];
+                    let d2 = tension.data[path[i]][path[j]] + tension.data[path[next_i]][path[next_j]];
                     if d2 < d1 {
                         path[next_i..=j].reverse();
                     }
@@ -66,10 +64,8 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
             for j in i + 2..end {
                 let next_j = (j + 1) % n;
-                let d1 = tension.data[path[i]][path[next_i]]
-                    + tension.data[path[j]][path[next_j]];
-                let d2 = tension.data[path[i]][path[j]]
-                    + tension.data[path[next_i]][path[next_j]];
+                let d1 = tension.data[path[i]][path[next_i]] + tension.data[path[j]][path[next_j]];
+                let d2 = tension.data[path[i]][path[j]] + tension.data[path[next_i]][path[next_j]];
                 if d2 < d1 {
                     path[next_i..=j].reverse();
                     improved = true;
