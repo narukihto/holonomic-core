@@ -39,7 +39,9 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                 improved = true;
             }
         }
-        if !improved { break; }
+        if !improved {
+            break;
+        }
     }
     path
 }
