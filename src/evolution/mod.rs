@@ -29,9 +29,10 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
     for _ in 0..2 {
         let mut improved = false;
-        for i in 0..n - 3 {
-            for j in i + 2..i + 20.min(n - 1) {
-                let next_i = i + 1;
+        for i in 0..n - 2 {
+            let next_i = i + 1;
+            let end = (i + 21).min(n);
+            for j in i + 2..end {
                 let next_j = (j + 1) % n;
 
                 let d1 = tension.data[path[i]][path[next_i]] + tension.data[path[j]][path[next_j]];
