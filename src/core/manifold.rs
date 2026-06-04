@@ -6,20 +6,9 @@ pub struct SovereignManifold {
     pub nodes: Vec<[f64; 2]>,
 }
 
-#[derive(Clone, Copy, Debug)]
-pub struct QuantumBundleConfig {
-    pub scale: f64,
-}
-
 impl SovereignManifold {
     pub fn new(nodes: &[[f64; 2]]) -> Self {
-        Self {
-            nodes: nodes.to_vec(),
-        }
-    }
-
-    pub fn size(&self) -> usize {
-        self.nodes.len()
+        Self { nodes: nodes.to_vec() }
     }
 
     pub fn compute_tension_matrix(&self) -> TensionMatrix {
@@ -28,22 +17,9 @@ impl SovereignManifold {
             .into_par_iter()
             .map(|i| {
                 let mut row = vec![0.0; n];
-                let mut neighbors: Vec<(usize, f64)> = (0..n)
-                    .filter(|&j| i != j)
-                    .map(|j| (j, self.euclidean_dist(self.nodes[i], self.nodes[j])))
-                    .collect();
-
-                let k = if n > 1000 { 40 } else { 60 };
-                let target_k = k.min(neighbors.len());
-
-                if target_k > 0 {
-                    neighbors.select_nth_unstable_by(target_k - 1, |a, b| {
-                        a.1.partial_cmp(&b.1).unwrap()
-                    });
-                    for &(j, dist) in neighbors.iter().take(target_k) {
-                        if dist > f64::EPSILON && dist.is_finite() {
-                            row[j] = (1.0 / dist).min(1e6);
-                        }
+                for j in 0..n {
+                    if i != j {
+                        row[j] = self.euclidean_dist(self.nodes[i], self.nodes[j]);
                     }
                 }
                 row
@@ -52,48 +28,33 @@ impl SovereignManifold {
         TensionMatrix::new(matrix)
     }
 
+    fn euclidean_dist(&self, a: [f64; 2], b: [f64; 2]) -> f64 {
+        ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
+    }
+
     pub fn compute_gradient_collapse(&self, nodes: &[[f64; 2]]) -> Vec<[f64; 2]> {
-        nodes
-            .par_iter()
-            .map(|&node| self.apply_local_manifold_pressure(node))
-            .collect()
+        nodes.par_iter().map(|&node| self.apply_local_manifold_pressure(node)).collect()
     }
 
     fn apply_local_manifold_pressure(&self, node: [f64; 2]) -> [f64; 2] {
         let mut force = [0.0, 0.0];
         let n = self.nodes.len();
-        let mut loc: Vec<(usize, f64)> = self
-            .nodes
-            .iter()
-            .enumerate()
+        let mut loc: Vec<(usize, f64)> = self.nodes.iter().enumerate()
             .filter(|(_, &other)| other != node)
-            .map(|(idx, &other)| {
-                (
-                    idx,
-                    (other[0] - node[0]).powi(2) + (other[1] - node[1]).powi(2),
-                )
-            })
+            .map(|(idx, &other)| (idx, (other[0] - node[0]).powi(2) + (other[1] - node[1]).powi(2)))
             .collect();
 
-        let k = if n > 1000 { 40 } else { 60 };
-        let k = k.min(loc.len());
-
+        let k = (n.min(60)).min(loc.len());
         if k > 0 {
             loc.select_nth_unstable_by(k - 1, |a, b| a.1.partial_cmp(&b.1).unwrap());
             for &(idx, dist_sq) in loc.iter().take(k) {
                 let other = self.nodes[idx];
-                if dist_sq > f64::EPSILON && dist_sq.is_finite() {
-                    let dist = dist_sq.sqrt();
-                    let f = (1.0 / dist_sq).clamp(0.0, 1e6);
-                    force[0] += f * (other[0] - node[0]) / dist;
-                    force[1] += f * (other[1] - node[1]) / dist;
-                }
+                let dist = dist_sq.sqrt();
+                let f = (1.0 / dist_sq.max(1e-9)).min(1e6);
+                force[0] += f * (other[0] - node[0]) / dist;
+                force[1] += f * (other[1] - node[1]) / dist;
             }
         }
         force
-    }
-
-    fn euclidean_dist(&self, a: [f64; 2], b: [f64; 2]) -> f64 {
-        ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
     }
 }
