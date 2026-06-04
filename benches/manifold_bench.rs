@@ -9,7 +9,7 @@ fn bench_sovereign_collapse(c: &mut Criterion) {
     let is_ci = env::var("CI").is_ok();
 
     let nodes: Vec<[f64; 2]> = vec![[0.0, 0.0], [1.0, 5.0], [2.0, 2.0], [5.0, 1.0], [10.0, 10.0]];
-    let manifold = SovereignManifold::new(&nodes);
+    let _manifold = SovereignManifold::new(&nodes);
     let config = QuantumBundleConfig { scale: 1.0 };
 
     c.bench_function("sovereign_collapse_5_nodes", |b| {
