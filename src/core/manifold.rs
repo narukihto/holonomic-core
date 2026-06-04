@@ -31,9 +31,7 @@ impl SovereignManifold {
             let target_k = k.min(neighbors.len());
 
             if target_k > 0 {
-                neighbors.select_nth_unstable_by(target_k - 1, |a, b| {
-                    a.1.partial_cmp(&b.1).unwrap()
-                });
+                neighbors.select_nth_unstable_by(target_k - 1, |a, b| a.1.partial_cmp(&b.1).unwrap());
                 for &(j, dist) in neighbors.iter().take(target_k) {
                     if dist > 1e-9 {
                         matrix[i][j] = 1.0 / dist;
