@@ -18,7 +18,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     path.sort_by(|&a, &b| {
         let ca = coords[a];
         let cb = coords[b];
-        
+
         let cell_x_a = (ca.0 * 50.0) as i64;
         let cell_y_a = (ca.1 * 50.0) as i64;
         let cell_x_b = (cb.0 * 50.0) as i64;
