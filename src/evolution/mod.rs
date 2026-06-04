@@ -25,7 +25,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         visited[next] = true;
     }
 
-    let max_epochs = if env::var("CI").is_ok() { 50 } else { 200 };
+    let max_epochs = if env::var("CI").is_ok() { 200 } else { 500 };
     for _ in 0..max_epochs {
         let mut improved = false;
         for i in 0..n - 1 {
@@ -43,6 +43,9 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                     current_path[next_i..=j].reverse();
                     improved = true;
                 }
+            }
+            if improved && n > 5000 {
+                break;
             }
         }
         if !improved {
