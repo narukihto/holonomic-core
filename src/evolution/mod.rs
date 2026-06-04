@@ -6,39 +6,55 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         return (0..n).collect();
     }
 
-    let mut visited = vec![false; n];
     let mut path = Vec::with_capacity(n);
-
+    let mut visited = vec![false; n];
+    
     let mut current = 0;
     path.push(current);
     visited[current] = true;
 
-    for _ in 1..n {
-        let mut best_next = 0;
+    let stride = if n > 10000 { 7 } else { 1 };
+
+    while path.len() < n {
+        let mut best_next = None;
         let mut min_cost = f64::MAX;
 
-        for (i, &is_visited) in visited.iter().enumerate() {
-            if !is_visited {
+        let mut i = 0;
+        while i < n {
+            if !visited[i] {
                 let cost = tension.data[current][i];
                 if cost < min_cost {
                     min_cost = cost;
-                    best_next = i;
+                    best_next = Some(i);
                 }
             }
+            i += stride;
         }
 
-        current = best_next;
+        let next_node = match best_next {
+            Some(node) => node,
+            None => {
+                let mut fallback = 0;
+                for (idx, &v) in visited.iter().enumerate() {
+                    if !v {
+                        fallback = idx;
+                        break;
+                    }
+                }
+                fallback
+            }
+        };
+
+        current = next_node;
         path.push(current);
         visited[current] = true;
     }
 
-    for _ in 0..10 {
+    for _ in 0..12 {
         let mut improved = false;
-
         for i in 0..n - 3 {
             let next_i = i + 1;
-            let end = (i + 61).min(n);
-
+            let end = (i + 120).min(n);
             for j in i + 2..end {
                 let next_j = (j + 1) % n;
 
@@ -51,7 +67,6 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                 }
             }
         }
-
         if !improved {
             break;
         }
