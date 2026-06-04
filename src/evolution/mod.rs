@@ -1,5 +1,4 @@
 use crate::core::tension::TensionMatrix;
-use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 
 pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     let n = tension.size;
@@ -7,28 +6,40 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         return (0..n).collect();
     }
 
-    let mut current_path: Vec<usize> = (0..n).collect();
-    let mut rng = StdRng::seed_from_u64(42);
-    current_path.shuffle(&mut rng);
+    let mut current_path = vec![0];
+    let mut visited = vec![false; n];
+    visited[0] = true;
+    let mut last = 0;
 
-    for _ in 0..50 {
-        let mut improved = false;
-        for i in 0..n - 1 {
-            let next_i = i + 1;
-            let range = n - i - 2;
-            if range == 0 {
-                continue;
+    for _ in 1..n {
+        let mut nearest = None;
+        let mut min_dist = f64::MAX;
+        for next in 0..n {
+            if !visited[next] && tension.data[last][next] < min_dist {
+                min_dist = tension.data[last][next];
+                nearest = Some(next);
             }
+        }
+        let next = nearest.unwrap();
+        current_path.push(next);
+        visited[next] = true;
+        last = next;
+    }
 
-            for _ in 0..100 {
-                let j = (i + 2 + (rand::random::<usize>() % range)).min(n - 1);
-                let next_j = (j + 1) % n;
+    for _ in 0..5 {
+        let mut improved = false;
+        for i in 0..n - 3 {
+            let next_i = i + 1;
+            for j in i + 2..i + 50 {
+                let k = j % n;
+                let next_j = (k + 1) % n;
+
                 if (tension.data[current_path[i]][current_path[next_i]]
-                    + tension.data[current_path[j]][current_path[next_j]])
-                    > (tension.data[current_path[i]][current_path[j]]
+                    + tension.data[current_path[k]][current_path[next_j]])
+                    > (tension.data[current_path[i]][current_path[k]]
                         + tension.data[current_path[next_i]][current_path[next_j]])
                 {
-                    current_path[next_i..=j].reverse();
+                    current_path[next_i..=k].reverse();
                     improved = true;
                 }
             }
