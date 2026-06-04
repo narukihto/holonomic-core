@@ -10,9 +10,11 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     }
 
     let mut current_path: Vec<usize> = (0..n).collect();
-    let max_epochs = if env::var("CI").is_ok() { 100 } else { 500 };
+    let max_epochs = if env::var("CI").is_ok() { 50 } else { 200 };
     let mut quantum_temperature = 500.0f64;
     let cooling_rate = 0.95;
+
+    let window = (n / 20).max(20).min(n);
 
     for epoch in 0..max_epochs {
         let jacobian_matrix = calculate_jacobian_manifold_operator(&current_path, &tension);
@@ -23,7 +25,8 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
             let mut internal_pressure = 0.0f64;
             let mut external_pressure = 0.0f64;
 
-            for j in 0..n {
+            for offset in 0..window {
+                let j = (i + offset) % n;
                 internal_pressure += jacobian_matrix[current_path[i]][current_path[j]];
                 external_pressure += jacobian_matrix[current_path[next]][current_path[j]];
             }
@@ -38,7 +41,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         }
 
         quantum_temperature *= cooling_rate;
-        if converged && epoch > 50 {
+        if converged && epoch > 20 {
             break;
         }
     }
