@@ -8,9 +8,8 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
     let mut visited = vec![false; n];
     let mut path = Vec::with_capacity(n);
-    let mut nearest_neighbors = vec![Vec::with_capacity(3); n];
-
     let mut current = 0;
+
     path.push(current);
     visited[current] = true;
 
@@ -19,11 +18,6 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         let mut min_cost = f64::MAX;
         let row = &tension.data[current];
 
-        let mut c1 = 0;
-        let mut c2 = 0;
-        let mut m1 = f64::MAX;
-        let mut m2 = f64::MAX;
-
         for (i, &is_visited) in visited.iter().enumerate() {
             if !is_visited {
                 let cost = row[i];
@@ -31,25 +25,8 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                     min_cost = cost;
                     best_next = i;
                 }
-                if cost < m1 {
-                    m2 = m1;
-                    c2 = c1;
-                    m1 = cost;
-                    c1 = i;
-                } else if cost < m2 {
-                    m2 = cost;
-                    c2 = i;
-                }
             }
         }
-
-        if m1 < f64::MAX {
-            nearest_neighbors[current].push(c1);
-        }
-        if m2 < f64::MAX {
-            nearest_neighbors[current].push(c2);
-        }
-
         current = best_next;
         path.push(current);
         visited[current] = true;
@@ -63,22 +40,38 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     let mut improved = true;
     let mut iterations = 0;
 
-    while improved && iterations < 25 {
+    while improved && iterations < 35 {
         improved = false;
         iterations += 1;
 
         for u in 0..n {
             let idx_u = pos[u];
-            if idx_u >= n - 1 {
-                continue;
+            let row = &tension.data[u];
+
+            let mut c1 = u;
+            let mut c2 = u;
+            let mut m1 = f64::MAX;
+            let mut m2 = f64::MAX;
+
+            for (v, &cost) in row.iter().enumerate() {
+                if v != u {
+                    if cost < m1 {
+                        m2 = m1;
+                        c2 = c1;
+                        m1 = cost;
+                        c1 = v;
+                    } else if cost < m2 {
+                        m2 = cost;
+                        c2 = v;
+                    }
+                }
             }
 
-            for &v in &nearest_neighbors[u] {
-                let idx_v = pos[v];
-                if idx_u == idx_v {
+            for v in [c1, c2] {
+                if v == u {
                     continue;
                 }
-
+                let idx_v = pos[v];
                 let i = idx_u.min(idx_v);
                 let j = idx_u.max(idx_v);
 
