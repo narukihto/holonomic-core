@@ -6,55 +6,34 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         return (0..n).collect();
     }
 
-    let mut path = Vec::with_capacity(n);
-    let mut visited = vec![false; n];
+    let mut path: Vec<usize> = (0..n).collect();
 
-    let mut current = 0;
-    path.push(current);
-    visited[current] = true;
-
-    let stride = if n > 10000 { 7 } else { 1 };
-
-    while path.len() < n {
-        let mut best_next = None;
-        let mut min_cost = f64::MAX;
-
-        let mut i = 0;
-        while i < n {
-            if !visited[i] {
-                let cost = tension.data[current][i];
-                if cost < min_cost {
-                    min_cost = cost;
-                    best_next = Some(i);
-                }
-            }
-            i += stride;
-        }
-
-        let next_node = match best_next {
-            Some(node) => node,
-            None => {
-                let mut fallback = 0;
-                for (idx, &v) in visited.iter().enumerate() {
-                    if !v {
-                        fallback = idx;
-                        break;
-                    }
-                }
-                fallback
-            }
-        };
-
-        current = next_node;
-        path.push(current);
-        visited[current] = true;
+    let mut chunks = 1;
+    while chunks * chunks < n {
+        chunks += 1;
     }
+    chunks = (chunks / 2).max(1);
 
-    for _ in 0..12 {
+    path.sort_by(|&a, &b| {
+        let cost_a = tension.data[0][a];
+        let cost_b = tension.data[0][b];
+        let chunk_a = (cost_a * chunks as f64) as usize;
+        let chunk_b = (cost_b * chunks as f64) as usize;
+
+        if chunk_a != chunk_b {
+            chunk_a.cmp(&chunk_b)
+        } else if chunk_a % 2 == 0 {
+            cost_a.partial_cmp(&cost_b).unwrap_or(std::cmp::Ordering::Equal)
+        } else {
+            cost_b.partial_cmp(&cost_a).unwrap_or(std::cmp::Ordering::Equal)
+        }
+    });
+
+    for _ in 0..15 {
         let mut improved = false;
         for i in 0..n - 3 {
             let next_i = i + 1;
-            let end = (i + 120).min(n);
+            let end = (i + 150).min(n);
             for j in i + 2..end {
                 let next_j = (j + 1) % n;
 
@@ -71,9 +50,6 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
             break;
         }
     }
-
-    visited.fill(false);
-    drop(visited);
 
     path
 }
