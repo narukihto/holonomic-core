@@ -6,40 +6,38 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         return (0..n).collect();
     }
 
-    let mut path: Vec<usize> = (0..n).collect();
-    let mut metrics = Vec::with_capacity(n);
+    let mut visited = vec![false; n];
+    let mut path = Vec::with_capacity(n);
 
-    for i in 0..n {
-        let d0 = tension.data[0][i];
-        let d1 = tension.data[n / 4][i];
-        let d2 = tension.data[n / 2][i];
-        let d3 = tension.data[3 * n / 4][i];
-        metrics.push((d0, d1, d2, d3));
-    }
+    let mut current = 0;
+    path.push(current);
+    visited[current] = true;
 
-    path.sort_by(|&a, &b| {
-        let ma = metrics[a];
-        let mb = metrics[b];
+    for _ in 1..n {
+        let mut best_next = 0;
+        let mut min_cost = f64::MAX;
+        let row = &tension.data[current];
 
-        let cell_x_a = ((ma.0 - ma.1) * 0.05) as i64;
-        let cell_y_a = ((ma.2 - ma.3) * 0.05) as i64;
-        let cell_x_b = ((mb.0 - mb.1) * 0.05) as i64;
-        let cell_y_b = ((mb.2 - mb.3) * 0.05) as i64;
-
-        if cell_x_a != cell_x_b {
-            cell_x_a.cmp(&cell_x_b)
-        } else if cell_x_a % 2 == 0 {
-            cell_y_a.cmp(&cell_y_b)
-        } else {
-            cell_y_b.cmp(&cell_y_a)
+        for (i, &is_visited) in visited.iter().enumerate() {
+            if !is_visited {
+                let cost = row[i];
+                if cost < min_cost {
+                    min_cost = cost;
+                    best_next = i;
+                }
+            }
         }
-    });
+
+        current = best_next;
+        path.push(current);
+        visited[current] = true;
+    }
 
     let mut improved = true;
     let mut iterations = 0;
 
-    let max_iters = if n <= 10000 { 45 } else { 2 };
-    let window_size = if n <= 10000 { 180 } else { 30 };
+    let max_iters = if n <= 10000 { 20 } else { 2 };
+    let window_size = if n <= 10000 { 450 } else { 40 };
 
     while improved && iterations < max_iters {
         improved = false;
