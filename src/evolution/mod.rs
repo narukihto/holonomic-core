@@ -26,7 +26,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
         if cell_x_a != cell_x_b {
             cell_x_a.cmp(&cell_x_b)
-        } else if cell_x_a.is_multiple_of(2) {
+        } else if cell_x_a % 2 == 0 {
             cell_y_a.cmp(&cell_y_b)
         } else {
             cell_y_b.cmp(&cell_y_a)
