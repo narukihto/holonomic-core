@@ -41,8 +41,8 @@ impl SovereignManifold {
                         a.1.partial_cmp(&b.1).unwrap()
                     });
                     for &(j, dist) in neighbors.iter().take(target_k) {
-                        if dist > f64::EPSILON {
-                            row[j] = 1.0 / dist;
+                        if dist > f64::EPSILON && dist.is_finite() {
+                            row[j] = (1.0 / dist).min(1e6);
                         }
                     }
                 }
@@ -82,9 +82,9 @@ impl SovereignManifold {
             loc.select_nth_unstable_by(k - 1, |a, b| a.1.partial_cmp(&b.1).unwrap());
             for &(idx, dist_sq) in loc.iter().take(k) {
                 let other = self.nodes[idx];
-                if dist_sq > f64::EPSILON {
+                if dist_sq > f64::EPSILON && dist_sq.is_finite() {
                     let dist = dist_sq.sqrt();
-                    let f = 1.0 / dist_sq;
+                    let f = (1.0 / dist_sq).clamp(0.0, 1e6);
                     force[0] += f * (other[0] - node[0]) / dist;
                     force[1] += f * (other[1] - node[1]) / dist;
                 }
