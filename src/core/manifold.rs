@@ -1,6 +1,11 @@
 use crate::core::tension::TensionMatrix;
 use rayon::prelude::*;
 
+#[derive(Clone, Copy, Debug)]
+pub struct QuantumBundleConfig {
+    pub scale: f64,
+}
+
 #[derive(Clone)]
 pub struct SovereignManifold {
     pub nodes: Vec<[f64; 2]>,
