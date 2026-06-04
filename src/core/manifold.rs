@@ -6,6 +6,11 @@ pub struct SovereignManifold {
     pub nodes: Vec<[f64; 2]>,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct QuantumBundleConfig {
+    pub scale: f64,
+}
+
 impl SovereignManifold {
     pub fn new(nodes: &[[f64; 2]]) -> Self {
         Self {
