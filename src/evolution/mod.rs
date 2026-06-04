@@ -1,6 +1,6 @@
-use crate::core::tension::TMatrix;
+use crate::core::tension::TensionMatrix;
 
-pub fn collapse_to_optimum(tension: TMatrix) -> Vec<usize> {
+pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     let n = tension.size;
     if n < 3 {
         return (0..n).collect();
