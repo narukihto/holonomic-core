@@ -8,7 +8,11 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
     let mut best_path = Vec::with_capacity(n);
     let mut min_total_cost = f64::MAX;
-    let sample_seeds = if n > 10000 { vec![0, n / 5, (2 * n) / 5] } else { vec![0] };
+    let sample_seeds = if n > 10000 {
+        vec![0, n / 5, (2 * n) / 5]
+    } else {
+        vec![0]
+    };
 
     for start_seed in sample_seeds {
         let mut visited = vec![false; n];
