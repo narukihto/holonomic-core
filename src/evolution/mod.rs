@@ -1,5 +1,4 @@
 use crate::core::tension::TensionMatrix;
-use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 
 pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     let n = tension.size;
@@ -7,28 +6,40 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         return (0..n).collect();
     }
 
-    let mut rng = StdRng::seed_from_u64(42);
-    let mut path: Vec<usize> = (0..n).collect();
-    path.shuffle(&mut rng);
+    let mut path = vec![0];
+    let mut visited = vec![false; n];
+    visited[0] = true;
+    let mut last = 0;
 
-    for _ in 0..5 {
+    for _ in 1..n {
+        let mut best = None;
+        let mut min = f64::MAX;
+        for i in 0..n {
+            if !visited[i] && tension.data[last][i] < min {
+                min = tension.data[last][i];
+                best = Some(i);
+            }
+        }
+        if let Some(next) = best {
+            path.push(next);
+            visited[next] = true;
+            last = next;
+        }
+    }
+
+    for _ in 0..3 {
         let mut improved = false;
-        for i in 0..n - 3 {
-            let next_i = i + 1;
-            let j = i + 2;
-            let k = i + 3;
-
-            let current_dist = tension.data[path[i]][path[next_i]] + tension.data[path[j]][path[k]];
-            let new_dist = tension.data[path[i]][path[j]] + tension.data[path[next_i]][path[k]];
-
-            if new_dist < current_dist {
-                path.swap(next_i, j);
+        for i in 0..n - 2 {
+            let j = i + 1;
+            let k = i + 2;
+            let d1 = tension.data[path[i]][path[j]] + tension.data[path[j]][path[k]];
+            let d2 = tension.data[path[i]][path[k]] + tension.data[path[k]][path[j]];
+            if d2 < d1 {
+                path.swap(j, k);
                 improved = true;
             }
         }
-        if !improved {
-            break;
-        }
+        if !improved { break; }
     }
     path
 }
