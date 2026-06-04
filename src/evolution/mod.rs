@@ -6,40 +6,24 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         return (0..n).collect();
     }
 
-    let mut visited = vec![false; n];
-    let mut path = Vec::with_capacity(n);
+    let mut path: Vec<usize> = (0..n).collect();
+    let mut radial_distances = Vec::with_capacity(n);
 
-    let mut current = 0;
-    path.push(current);
-    visited[current] = true;
-
-    for _ in 1..n {
-        let mut best_next = 0;
-        let mut min_score = f64::MAX;
-        let row = &tension.data[current];
-        let center_row = &tension.data[0];
-        let far_row = &tension.data[n - 1];
-
-        for (i, &is_visited) in visited.iter().enumerate() {
-            if !is_visited {
-                let cost = row[i];
-                let score = cost + 0.15 * center_row[i] - 0.05 * far_row[i];
-                if score < min_score {
-                    min_score = score;
-                    best_next = i;
-                }
-            }
-        }
-
-        current = best_next;
-        path.push(current);
-        visited[current] = true;
+    for i in 0..n {
+        radial_distances.push(tension.data[0][i]);
     }
+
+    path.sort_by(|&a, &b| {
+        radial_distances[a]
+            .partial_cmp(&radial_distances[b])
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
 
     let mut improved = true;
     let mut iterations = 0;
-    let max_iters = if n <= 10000 { 8 } else { 1 };
-    let window_size = if n <= 10000 { 120 } else { 20 };
+    
+    let max_iters = if n <= 10000 { 15 } else { 2 };
+    let window_size = if n <= 10000 { 350 } else { 30 };
 
     while improved && iterations < max_iters {
         improved = false;
