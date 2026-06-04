@@ -14,16 +14,19 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     for _ in 1..n {
         let mut nearest = None;
         let mut min_dist = f64::MAX;
-        for next in 0..n {
-            if !visited[next] && tension.data[last][next] < min_dist {
+        
+        for (next, &is_visited) in visited.iter().enumerate() {
+            if !is_visited && tension.data[last][next] < min_dist {
                 min_dist = tension.data[last][next];
                 nearest = Some(next);
             }
         }
-        let next = nearest.unwrap();
-        current_path.push(next);
-        visited[next] = true;
-        last = next;
+        
+        if let Some(next) = nearest {
+            current_path.push(next);
+            visited[next] = true;
+            last = next;
+        }
     }
 
     for _ in 0..5 {
