@@ -7,14 +7,14 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     }
 
     let mut current_path: Vec<usize> = (0..n).collect();
-    
+
     let mut improved = true;
     let mut iterations = 0;
-    
+
     while improved && iterations < 20 {
         improved = false;
         iterations += 1;
-        
+
         for i in 0..n - 3 {
             for j in i + 2..n - 1 {
                 for k in j + 2..n {
@@ -36,9 +36,13 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                         improved = true;
                     }
                 }
-                if improved { break; }
+                if improved {
+                    break;
+                }
             }
-            if improved { break; }
+            if improved {
+                break;
+            }
         }
     }
     current_path
