@@ -24,11 +24,12 @@ impl SovereignManifold {
             .into_par_iter()
             .map(|i| {
                 let mut row = vec![0.0; n];
-                for j in 0..n {
+                // الإصلاح هنا: استخدام iter_mut().enumerate() لتجنب needless_range_loop
+                row.iter_mut().enumerate().for_each(|(j, val)| {
                     if i != j {
-                        row[j] = self.euclidean_dist(self.nodes[i], self.nodes[j]);
+                        *val = self.euclidean_dist(self.nodes[i], self.nodes[j]);
                     }
-                }
+                });
                 row
             })
             .collect();
