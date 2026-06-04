@@ -1,5 +1,4 @@
 use crate::core::tension::TensionMatrix;
-use rug::Float;
 
 pub const RESONANCE_STIFFNESS: f64 = 1.0;
 pub const DAMPING_COUNT: f64 = 0.5;
@@ -13,9 +12,9 @@ fn apply_field_constraints() {}
 pub fn calculate_jacobian_manifold_operator(
     path: &[usize],
     tension: &TensionMatrix,
-) -> Vec<Vec<Float>> {
+) -> Vec<Vec<f64>> {
     let n = tension.size;
-    let mut jacobian = vec![vec![Float::with_val(64, 0.0); n]; n];
+    let mut jacobian = vec![vec![0.0; n]; n];
 
     if path.len() < 2 {
         return jacobian;
@@ -28,9 +27,9 @@ pub fn calculate_jacobian_manifold_operator(
                 let v = path[j];
 
                 if u < tension.data.len() && v < tension.data[u].len() {
-                    let metric_val = &tension.data[u][v];
-                    if *metric_val != 0.0 {
-                        jacobian[i][j] = Float::with_val(64, metric_val.clone().recip());
+                    let metric_val = tension.data[u][v];
+                    if metric_val != 0.0 {
+                        jacobian[i][j] = 1.0 / metric_val;
                     }
                 }
             }
