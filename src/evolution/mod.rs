@@ -37,7 +37,9 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                 let x = current_path[j];
                 let y = current_path[next_j];
 
-                if (tension.data[u][v] + tension.data[x][y]) > (tension.data[u][x] + tension.data[v][y]) {
+                if (tension.data[u][v] + tension.data[x][y])
+                    > (tension.data[u][x] + tension.data[v][y])
+                {
                     current_path[next_i..=j].reverse();
                     improved = true;
                 }
