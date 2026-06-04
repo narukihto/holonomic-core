@@ -1,6 +1,6 @@
-use crate::core::tension::TensionMatrix;
+use crate::core::tension::TMatrix;
 
-pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
+pub fn collapse_to_optimum(tension: TMatrix) -> Vec<usize> {
     let n = tension.size;
     if n < 3 {
         return (0..n).collect();
@@ -23,9 +23,13 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         if chunk_a != chunk_b {
             chunk_a.cmp(&chunk_b)
         } else if chunk_a % 2 == 0 {
-            cost_a.partial_cmp(&cost_b).unwrap_or(std::cmp::Ordering::Equal)
+            cost_a
+                .partial_cmp(&cost_b)
+                .unwrap_or(std::cmp::Ordering::Equal)
         } else {
-            cost_b.partial_cmp(&cost_a).unwrap_or(std::cmp::Ordering::Equal)
+            cost_b
+                .partial_cmp(&cost_a)
+                .unwrap_or(std::cmp::Ordering::Equal)
         }
     });
 
