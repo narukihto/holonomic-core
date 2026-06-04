@@ -1,6 +1,5 @@
 use crate::core::tension::TensionMatrix;
 use rayon::prelude::*;
-use rug::Float;
 use tokio::sync::mpsc;
 
 pub struct SovereignSignature {
@@ -10,7 +9,7 @@ pub struct SovereignSignature {
 
 pub async fn sign_manifold_async(matrix: &TensionMatrix, tx: mpsc::Sender<SovereignSignature>) {
     let noise = generate_lattice_noise(matrix);
-    let is_valid = verify_integrity(matrix, &noise);
+    let is_valid = verify_integrity(matrix, noise);
 
     if !is_valid {
         trigger_geometric_lockdown();
@@ -24,20 +23,19 @@ pub async fn sign_manifold_async(matrix: &TensionMatrix, tx: mpsc::Sender<Sovere
         .await;
 }
 
-fn generate_lattice_noise(matrix: &TensionMatrix) -> Float {
-    let total_sum: Float = matrix
+fn generate_lattice_noise(matrix: &TensionMatrix) -> f64 {
+    let total_sum: f64 = matrix
         .data
         .par_iter()
-        .map(|row| row.iter().fold(Float::with_val(64, 0.0), |acc, x| acc + x))
-        .reduce(|| Float::with_val(64, 0.0), |acc, x| acc + x);
+        .map(|row| row.iter().sum::<f64>())
+        .sum();
 
-    total_sum.fract()
+    total_sum.fract().abs()
 }
 
-fn verify_integrity(matrix: &TensionMatrix, noise: &Float) -> bool {
+fn verify_integrity(matrix: &TensionMatrix, noise: f64) -> bool {
     let current_noise = generate_lattice_noise(matrix);
-    let diff = (current_noise - noise).abs();
-    diff < Float::with_val(64, 1e-5)
+    (current_noise - noise).abs() < 1e-5
 }
 
 fn trigger_geometric_lockdown() {
