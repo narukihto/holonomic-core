@@ -9,12 +9,21 @@ use std::time::Instant;
 #[test]
 fn test_nphard_p_vs_np_equivalence_boundary() {
     let is_ci = env::var("CI").is_ok();
-    let scales = if is_ci { vec![1000, 5000] } else { vec![10_000, 100_000, 1_000_000] };
+    let scales = if is_ci {
+        vec![1000, 5000]
+    } else {
+        vec![10_000, 100_000, 1_000_000]
+    };
     let mut rng = rand::thread_rng();
 
     for n in scales {
         let nodes: Vec<[f64; 2]> = (0..n)
-            .map(|_| [rng.gen_range(0.0..1_000_000.0), rng.gen_range(0.0..1_000_000.0)])
+            .map(|_| {
+                [
+                    rng.gen_range(0.0..1_000_000.0),
+                    rng.gen_range(0.0..1_000_000.0),
+                ]
+            })
             .collect();
 
         let start = Instant::now();
@@ -82,7 +91,9 @@ fn test_historic_germany_d15112_exact_match() {
                 read_coords = true;
                 continue;
             }
-            if l.starts_with("EOF") { break; }
+            if l.starts_with("EOF") {
+                break;
+            }
             if read_coords {
                 let parts: Vec<&str> = l.split_whitespace().collect();
                 if parts.len() == 3 {
