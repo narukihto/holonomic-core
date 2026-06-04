@@ -15,14 +15,17 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
     for _ in 1..n {
         let mut best_next = 0;
-        let mut min_cost = f64::MAX;
+        let mut min_score = f64::MAX;
         let row = &tension.data[current];
+        let center_row = &tension.data[0];
+        let far_row = &tension.data[n - 1];
 
         for (i, &is_visited) in visited.iter().enumerate() {
             if !is_visited {
                 let cost = row[i];
-                if cost < min_cost {
-                    min_cost = cost;
+                let score = cost + 0.15 * center_row[i] - 0.05 * far_row[i];
+                if score < min_score {
+                    min_score = score;
                     best_next = i;
                 }
             }
@@ -35,9 +38,8 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
     let mut improved = true;
     let mut iterations = 0;
-
-    let max_iters = if n <= 10000 { 20 } else { 2 };
-    let window_size = if n <= 10000 { 450 } else { 40 };
+    let max_iters = if n <= 10000 { 8 } else { 1 };
+    let window_size = if n <= 10000 { 120 } else { 20 };
 
     while improved && iterations < max_iters {
         improved = false;
