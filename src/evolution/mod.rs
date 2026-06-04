@@ -1,5 +1,4 @@
 use crate::core::tension::TensionMatrix;
-use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 
 pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     let n = tension.size;
@@ -7,15 +6,13 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         return (0..n).collect();
     }
 
-    let mut rng = StdRng::seed_from_u64(42);
     let mut path: Vec<usize> = (0..n).collect();
-    path.shuffle(&mut rng);
 
-    for _ in 0..5 {
+    for _ in 0..3 {
         let mut improved = false;
         for i in 0..n - 3 {
             let next_i = i + 1;
-            let end = (i + 31).min(n);
+            let end = (i + 51).min(n);
             for j in i + 2..end {
                 let next_j = (j + 1) % n;
 
