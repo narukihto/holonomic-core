@@ -14,8 +14,8 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     for _ in 1..n {
         let mut best = None;
         let mut min = f64::MAX;
-        for i in 0..n {
-            if !visited[i] && tension.data[last][i] < min {
+        for (i, &is_visited) in visited.iter().enumerate() {
+            if !is_visited && tension.data[last][i] < min {
                 min = tension.data[last][i];
                 best = Some(i);
             }
