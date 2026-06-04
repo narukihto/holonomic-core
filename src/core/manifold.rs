@@ -18,13 +18,16 @@ impl SovereignManifold {
         }
     }
 
+    pub fn size(&self) -> usize {
+        self.nodes.len()
+    }
+
     pub fn compute_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
         let matrix: Vec<Vec<f64>> = (0..n)
             .into_par_iter()
             .map(|i| {
                 let mut row = vec![0.0; n];
-                // الإصلاح هنا: استخدام iter_mut().enumerate() لتجنب needless_range_loop
                 row.iter_mut().enumerate().for_each(|(j, val)| {
                     if i != j {
                         *val = self.euclidean_dist(self.nodes[i], self.nodes[j]);
