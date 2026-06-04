@@ -1,5 +1,4 @@
 use crate::core::tension::TensionMatrix;
-use std::env;
 
 pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     let n = tension.size;
@@ -25,12 +24,13 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         visited[next] = true;
     }
 
-    let max_epochs = if env::var("CI").is_ok() { 200 } else { 500 };
+    let max_epochs = 100;
     for _ in 0..max_epochs {
         let mut improved = false;
         for i in 0..n - 1 {
             let next_i = (i + 1) % n;
-            for j in i + 2..n {
+            let limit = (i + 500).min(n);
+            for j in i + 2..limit {
                 let next_j = (j + 1) % n;
                 let u = current_path[i];
                 let v = current_path[next_i];
@@ -43,9 +43,6 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                     current_path[next_i..=j].reverse();
                     improved = true;
                 }
-            }
-            if improved && n > 5000 {
-                break;
             }
         }
         if !improved {
