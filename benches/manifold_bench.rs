@@ -1,4 +1,4 @@
-use ark_penta_v_core::{collapse_to_optimum, QuantumBundleConfig, SovereignManifold};
+use ark_penta_v_core::{collapse_to_optimum, execute_sovereign_collapse, QuantumBundleConfig, SovereignManifold};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use std::env;
 use std::time::Duration;
@@ -8,13 +8,10 @@ fn bench_sovereign_collapse(c: &mut Criterion) {
 
     let nodes: Vec<[f64; 2]> = vec![[0.0, 0.0], [1.0, 5.0], [2.0, 2.0], [5.0, 1.0], [10.0, 10.0]];
     let manifold = SovereignManifold::new(&nodes);
-    let config = QuantumBundleConfig {
-        distance_matrix: vec![],
-        adiabatic_time: 100.0,
-    };
+    let config = QuantumBundleConfig { scale: 1.0 };
 
     c.bench_function("sovereign_collapse_5_nodes", |b| {
-        b.iter(|| config.execute_sovereign_collapse(black_box(&manifold)))
+        b.iter(|| execute_sovereign_collapse(black_box(config), black_box(&nodes)))
     });
 
     let node_count = if is_ci { 100 } else { 10000 };
