@@ -12,7 +12,7 @@ pub use crate::physics::calibrate_resonance_lattice;
 
 pub fn execute_sovereign_collapse(config: QuantumBundleConfig, nodes: &[[f64; 2]]) -> f64 {
     let manifold = SovereignManifold::new(nodes);
-    let tension = manifold.compute_sparse_tension_matrix();
+    let tension = manifold.compute_tension_matrix();
     (tension.size as f64) * config.scale
 }
 
