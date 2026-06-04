@@ -8,7 +8,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
     let mut path: Vec<usize> = (0..n).collect();
     let mut coords = Vec::with_capacity(n);
-    
+
     for i in 0..n {
         coords.push((tension.data[0][i], tension.data[n - 1][i]));
     }
@@ -33,7 +33,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
     let mut improved = true;
     let mut iterations = 0;
-    
+
     let max_iters = if n <= 10000 { 8 } else { 2 };
     let window_size = if n <= 10000 { 200 } else { 40 };
 
