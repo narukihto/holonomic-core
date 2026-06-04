@@ -8,7 +8,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
     let mut path = Vec::with_capacity(n);
     let mut visited = vec![false; n];
-    
+
     let mut current = 0;
     path.push(current);
     visited[current] = true;
