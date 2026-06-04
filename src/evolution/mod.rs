@@ -22,7 +22,7 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
         if chunk_a != chunk_b {
             chunk_a.cmp(&chunk_b)
-        } else if chunk_a % 2 == 0 {
+        } else if chunk_a.is_multiple_of(2) {
             cost_a
                 .partial_cmp(&cost_b)
                 .unwrap_or(std::cmp::Ordering::Equal)
