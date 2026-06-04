@@ -33,7 +33,7 @@ impl SovereignManifold {
                     .map(|j| (j, self.euclidean_dist(self.nodes[i], self.nodes[j])))
                     .collect();
 
-                let k = if n > 1000 { 20 } else { 50 };
+                let k = if n > 1000 { 40 } else { 60 };
                 let target_k = k.min(neighbors.len());
 
                 if target_k > 0 {
@@ -75,7 +75,7 @@ impl SovereignManifold {
             })
             .collect();
 
-        let k = if n > 1000 { 20 } else { 50 };
+        let k = if n > 1000 { 40 } else { 60 };
         let k = k.min(loc.len());
 
         if k > 0 {
