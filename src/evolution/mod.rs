@@ -1,6 +1,5 @@
 use crate::core::tension::TensionMatrix;
 use crate::physics::calculate_jacobian_manifold_operator;
-use rug::Float;
 use std::collections::HashSet;
 use std::env;
 
@@ -22,20 +21,20 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
         for i in 0..n {
             let next = (i + 1) % n;
-            let mut internal_pressure = Float::with_val(64, 0.0);
+            let mut internal_pressure = 0.0f64;
             let start_j = i.saturating_sub(k_neighbors / 2);
             let end_j = std::cmp::min(start_j + k_neighbors + 1, n);
 
             for j in start_j..end_j {
                 if j < n && i < n {
-                    internal_pressure += &jacobian_matrix[current_path[i]][current_path[j]];
+                    internal_pressure += jacobian_matrix[current_path[i]][current_path[j]];
                 }
             }
 
-            let mut external_pressure = Float::with_val(64, 0.0);
+            let mut external_pressure = 0.0f64;
             for j in start_j..end_j {
                 if j < n && next < n {
-                    external_pressure += &jacobian_matrix[current_path[next]][current_path[j]];
+                    external_pressure += jacobian_matrix[current_path[next]][current_path[j]];
                 }
             }
 
