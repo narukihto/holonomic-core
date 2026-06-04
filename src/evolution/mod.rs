@@ -1,4 +1,5 @@
 use crate::core::tension::TensionMatrix;
+use rand::seq::SliceRandom;
 
 pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     let n = tension.size;
@@ -7,43 +8,37 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
     }
 
     let mut current_path: Vec<usize> = (0..n).collect();
+    let mut rng = rand::thread_rng();
+    current_path.shuffle(&mut rng);
 
-    let mut improved = true;
-    let mut iterations = 0;
+    for _ in 0..50 {
+        let mut improved = false;
 
-    while improved && iterations < 20 {
-        improved = false;
-        iterations += 1;
+        for i in 0..n - 1 {
+            let next_i = i + 1;
 
-        for i in 0..n - 3 {
-            for j in i + 2..n - 1 {
-                for k in j + 2..n {
-                    let a = current_path[i];
-                    let b = current_path[i + 1];
-                    let c = current_path[j];
-                    let d = current_path[j + 1];
-                    let e = current_path[k];
-                    let f = current_path[(k + 1) % n];
+            for _ in 0..100 {
+                let j = (i + 2 + (rand::random::<usize>() % (n - i - 2))).min(n - 1);
+                let next_j = (j + 1) % n;
 
-                    let old_dist = tension.data[a][b] + tension.data[c][d] + tension.data[e][f];
-                    let new_dist = tension.data[a][c] + tension.data[b][e] + tension.data[d][f];
+                let u = current_path[i];
+                let v = current_path[next_i];
+                let x = current_path[j];
+                let y = current_path[next_j];
 
-                    if new_dist < old_dist {
-                        let mut new_segment = Vec::new();
-                        new_segment.extend_from_slice(&current_path[i + 1..=j]);
-                        new_segment.reverse();
-                        current_path[i + 1..=j].copy_from_slice(&new_segment);
-                        improved = true;
-                    }
+                if (tension.data[u][v] + tension.data[x][y])
+                    > (tension.data[u][x] + tension.data[v][y])
+                {
+                    current_path[next_i..=j].reverse();
+                    improved = true;
                 }
-                if improved {
-                    break;
-                }
-            }
-            if improved {
-                break;
             }
         }
+
+        if !improved {
+            break;
+        }
     }
+
     current_path
 }
