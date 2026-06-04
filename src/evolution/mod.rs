@@ -16,9 +16,14 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
         for i in 0..n - 1 {
             let next_i = i + 1;
+            let range = n - i - 2;
+
+            if range == 0 {
+                continue;
+            }
 
             for _ in 0..100 {
-                let j = (i + 2 + (rand::random::<usize>() % (n - i - 2))).min(n - 1);
+                let j = (i + 2 + (rand::random::<usize>() % range)).min(n - 1);
                 let next_j = (j + 1) % n;
 
                 let u = current_path[i];
