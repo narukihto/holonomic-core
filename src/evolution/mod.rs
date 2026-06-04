@@ -6,38 +6,44 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
         return (0..n).collect();
     }
 
-    let mut path: Vec<usize> = (0..n).collect();
+    let mut visited = vec![false; n];
+    let mut path = Vec::with_capacity(n);
 
-    let mut chunks = 1;
-    while chunks * chunks < n {
-        chunks += 1;
-    }
-    chunks = (chunks / 2).max(1);
+    let mut current = 0;
+    path.push(current);
+    visited[current] = true;
 
-    path.sort_by(|&a, &b| {
-        let cost_a = tension.data[0][a];
-        let cost_b = tension.data[0][b];
-        let chunk_a = (cost_a * chunks as f64) as usize;
-        let chunk_b = (cost_b * chunks as f64) as usize;
+    for _ in 1..n {
+        let mut best_next = 0;
+        let mut min_cost = f64::MAX;
 
-        if chunk_a != chunk_b {
-            chunk_a.cmp(&chunk_b)
-        } else if chunk_a.is_multiple_of(2) {
-            cost_a
-                .partial_cmp(&cost_b)
-                .unwrap_or(std::cmp::Ordering::Equal)
-        } else {
-            cost_b
-                .partial_cmp(&cost_a)
-                .unwrap_or(std::cmp::Ordering::Equal)
+        let row = &tension.data[current];
+        for (i, &is_visited) in visited.iter().enumerate() {
+            if !is_visited {
+                let cost = row[i];
+                if cost < min_cost {
+                    min_cost = cost;
+                    best_next = i;
+                }
+            }
         }
-    });
 
-    for _ in 0..15 {
-        let mut improved = false;
+        current = best_next;
+        path.push(current);
+        visited[current] = true;
+    }
+
+    let mut global_improved = true;
+    let mut iterations = 0;
+
+    while global_improved && iterations < 8 {
+        global_improved = false;
+        iterations += 1;
+
         for i in 0..n - 3 {
             let next_i = i + 1;
-            let end = (i + 150).min(n);
+            let end = (i + 200).min(n);
+
             for j in i + 2..end {
                 let next_j = (j + 1) % n;
 
@@ -46,14 +52,14 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
                 if d2 < d1 {
                     path[next_i..=j].reverse();
-                    improved = true;
+                    global_improved = true;
                 }
             }
         }
-        if !improved {
-            break;
-        }
     }
+
+    visited.fill(false);
+    drop(visited);
 
     path
 }
