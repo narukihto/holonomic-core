@@ -18,6 +18,10 @@ impl SovereignManifold {
         }
     }
 
+    pub fn compute_tension_matrix(&self) -> TensionMatrix {
+        self.compute_sparse_tension_matrix()
+    }
+
     pub fn compute_sparse_tension_matrix(&self) -> TensionMatrix {
         let n = self.nodes.len();
         let matrix: Vec<Vec<f64>> = (0..n)
