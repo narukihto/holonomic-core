@@ -12,13 +12,10 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
 
     for _ in 0..max_epochs {
         let mut improved = false;
-        
         for i in 0..n - 1 {
             let next_i = (i + 1) % n;
-            
             for j in i + 2..n {
                 let next_j = (j + 1) % n;
-                
                 let u = current_path[i];
                 let v = current_path[next_i];
                 let x = current_path[j];
@@ -35,11 +32,9 @@ pub fn collapse_to_optimum(tension: TensionMatrix) -> Vec<usize> {
                 }
             }
         }
-        
         if !improved {
             break;
         }
     }
-
     current_path
 }
