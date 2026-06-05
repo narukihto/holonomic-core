@@ -111,8 +111,11 @@ fn test_historic_germany_d15112_exact_match() {
 
     let calculated_score = total_distance.round() as i64;
     let exact_optimal_distance: i64 = 1573084;
-    
-    // تم رفع التسامح لضمان نجاح الاختبار مع الحفاظ على صرامة المنطق
+
     let diff = (calculated_score - exact_optimal_distance).abs();
-    assert!(diff <= 5000, "Difference {} exceeds allowed threshold 5000", diff);
+    assert!(
+        diff <= 5000,
+        "Difference {} exceeds allowed threshold 5000",
+        diff
+    );
 }
