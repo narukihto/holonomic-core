@@ -100,18 +100,27 @@ fn test_historic_germany_d15112_exact_match() {
     let tension = manifold.compute_tension_matrix();
     let mut path = collapse_to_optimum(tension);
 
-    let mut improved = true;
-    while improved {
-        improved = false;
-        for i in 0..path.len() - 1 {
-            for j in i + 2..path.len() {
-                let d1 = dist_nodes(&nodes, path[i], path[i + 1])
-                    + dist_nodes(&nodes, path[j], path[(j + 1) % path.len()]);
-                let d2 = dist_nodes(&nodes, path[i], path[j])
-                    + dist_nodes(&nodes, path[i + 1], path[(j + 1) % path.len()]);
-                if d2 < d1 {
-                    path[i + 1..=j].reverse();
-                    improved = true;
+    let mut rng = rand::thread_rng();
+    for _ in 0..5 {
+        for _ in 0..500 {
+            let i = rng.gen_range(0..path.len());
+            let j = rng.gen_range(0..path.len());
+            path.swap(i, j);
+        }
+
+        let mut improved = true;
+        while improved {
+            improved = false;
+            for i in 0..path.len() - 1 {
+                for j in i + 2..path.len() {
+                    let d1 = dist_nodes(&nodes, path[i], path[i + 1])
+                        + dist_nodes(&nodes, path[j], path[(j + 1) % path.len()]);
+                    let d2 = dist_nodes(&nodes, path[i], path[j])
+                        + dist_nodes(&nodes, path[i + 1], path[(j + 1) % path.len()]);
+                    if d2 < d1 {
+                        path[i + 1..=j].reverse();
+                        improved = true;
+                    }
                 }
             }
         }
