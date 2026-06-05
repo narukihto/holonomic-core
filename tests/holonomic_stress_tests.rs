@@ -75,15 +75,11 @@ fn test_tsp_nphard_absolute_break_100k() {
     );
 }
 
-use std::fs::File;
-use std::io::{BufRead, BufReader};
-use std::path::Path;
-
 #[test]
 fn test_historic_germany_d15112_exact_match() {
     let file_path = "d15112.tsp";
 
-    // Attempt to open the file from the project root
+    // Open the file from the project root
     let file = File::open(file_path)
         .expect("Error: d15112.tsp file not found in the project root directory!");
     let reader = BufReader::new(file);
