@@ -75,58 +75,68 @@ fn test_tsp_nphard_absolute_break_100k() {
     );
 }
 
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+use std::path::Path;
+
 #[test]
 fn test_historic_germany_d15112_exact_match() {
     let file_path = "d15112.tsp";
-    if !Path::new(file_path).exists() {
-        let url = "http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/d15112.tsp";
-        if let Ok(response) = ureq::get(url).call() {
-            let mut file = File::create(file_path).unwrap();
-            std::io::copy(&mut response.into_reader(), &mut file).unwrap();
+
+    // Attempt to open the file from the project root
+    let file = File::open(file_path)
+        .expect("Error: d15112.tsp file not found in the project root directory!");
+    let reader = BufReader::new(file);
+    let mut nodes: Vec<[f64; 2]> = Vec::new();
+    let mut read_coords = false;
+
+    for line in reader.lines() {
+        let l = line.unwrap();
+        if l.starts_with("NODE_COORD_SECTION") {
+            read_coords = true;
+            continue;
+        }
+        if l.starts_with("EOF") {
+            break;
+        }
+        if read_coords {
+            let parts: Vec<&str> = l.split_whitespace().collect();
+            if parts.len() == 3 {
+                let x: f64 = parts[1].parse().unwrap();
+                let y: f64 = parts[2].parse().unwrap();
+                nodes.push([x, y]);
+            }
         }
     }
 
-    if Path::new(file_path).exists() {
-        let file = File::open(file_path).unwrap();
-        let reader = BufReader::new(file);
-        let mut nodes: Vec<[f64; 2]> = Vec::new();
-        let mut read_coords = false;
-        for line in reader.lines() {
-            let l = line.unwrap();
-            if l.starts_with("NODE_COORD_SECTION") {
-                read_coords = true;
-                continue;
-            }
-            if l.starts_with("EOF") {
-                break;
-            }
-            if read_coords {
-                let parts: Vec<&str> = l.split_whitespace().collect();
-                if parts.len() == 3 {
-                    let x: f64 = parts[1].parse().unwrap();
-                    let y: f64 = parts[2].parse().unwrap();
-                    nodes.push([x, y]);
-                }
-            }
-        }
+    assert_eq!(
+        nodes.len(),
+        15112,
+        "Failed to read exactly 15112 cities from the file!"
+    );
 
-        if nodes.len() == 15112 {
-            let manifold = SovereignManifold::new(&nodes);
-            let tension = manifold.compute_tension_matrix();
-            let optimized_path = collapse_to_optimum(tension);
-            let mut total_distance = 0.0;
-            for i in 0..optimized_path.len() {
-                let u = optimized_path[i];
-                let v = optimized_path[(i + 1) % optimized_path.len()];
-                let dx = nodes[u][0] - nodes[v][0];
-                let dy = nodes[u][1] - nodes[v][1];
-                total_distance += (dx * dx + dy * dy).sqrt();
-            }
+    let manifold = SovereignManifold::new(&nodes);
+    let tension = manifold.compute_tension_matrix();
+    let optimized_path = collapse_to_optimum(tension);
 
-            let calculated_score = total_distance.round() as i64;
-            let exact_optimal_distance: i64 = 1573084;
-            let diff = (calculated_score - exact_optimal_distance).abs();
-            assert!(diff <= 5);
-        }
+    let mut total_distance = 0.0;
+    for i in 0..optimized_path.len() {
+        let u = optimized_path[i];
+        let v = optimized_path[(i + 1) % optimized_path.len()];
+        let dx = nodes[u][0] - nodes[v][0];
+        let dy = nodes[u][1] - nodes[v][1];
+        total_distance += (dx * dx + dy * dy).sqrt();
     }
+
+    let calculated_score = total_distance.round() as i64;
+    let exact_optimal_distance: i64 = 1573084;
+    let diff = (calculated_score - exact_optimal_distance).abs();
+
+    assert!(
+        diff <= 5,
+        "Calculated score {} differs from the optimal {} (Difference: {})",
+        calculated_score,
+        exact_optimal_distance,
+        diff
+    );
 }
