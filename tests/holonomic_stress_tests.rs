@@ -3,7 +3,6 @@ use rand::Rng;
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::path::Path;
 use std::time::Instant;
 
 #[test]
@@ -31,8 +30,6 @@ fn test_nphard_p_vs_np_equivalence_boundary() {
         let tension = manifold.compute_tension_matrix();
         let _ = collapse_to_optimum(tension);
         let elapsed = start.elapsed().as_secs_f64();
-
-        println!("Nodes: {}, Time: {:.4}s", n, elapsed);
 
         let max_allowed_time = (n as f64).powf(1.5) * 0.0001;
         assert!(elapsed < max_allowed_time);
@@ -67,21 +64,13 @@ fn test_tsp_nphard_absolute_break_100k() {
     let optimality_ratio = total_distance / lower_bound;
 
     let tolerance = if is_ci { 1.10 } else { 1.01 };
-    assert!(
-        optimality_ratio < tolerance,
-        "Ratio {} exceeded limit {}",
-        optimality_ratio,
-        tolerance
-    );
+    assert!(optimality_ratio < tolerance);
 }
 
 #[test]
 fn test_historic_germany_d15112_exact_match() {
     let file_path = "d15112.tsp";
-
-    // Open the file from the project root
-    let file = File::open(file_path)
-        .expect("Error: d15112.tsp file not found in the project root directory!");
+    let file = File::open(file_path).unwrap();
     let reader = BufReader::new(file);
     let mut nodes: Vec<[f64; 2]> = Vec::new();
     let mut read_coords = false;
@@ -105,11 +94,7 @@ fn test_historic_germany_d15112_exact_match() {
         }
     }
 
-    assert_eq!(
-        nodes.len(),
-        15112,
-        "Failed to read exactly 15112 cities from the file!"
-    );
+    assert_eq!(nodes.len(), 15112);
 
     let manifold = SovereignManifold::new(&nodes);
     let tension = manifold.compute_tension_matrix();
@@ -128,11 +113,5 @@ fn test_historic_germany_d15112_exact_match() {
     let exact_optimal_distance: i64 = 1573084;
     let diff = (calculated_score - exact_optimal_distance).abs();
 
-    assert!(
-        diff <= 5,
-        "Calculated score {} differs from the optimal {} (Difference: {})",
-        calculated_score,
-        exact_optimal_distance,
-        diff
-    );
+    assert!(diff <= 5);
 }
